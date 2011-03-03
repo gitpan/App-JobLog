@@ -1,0 +1,39 @@
+---
+abstract: 'log what you do'
+author:
+  - 'David F. Houghton <dfhoughton@gmail.com>'
+build_requires:
+  File::Spec: 0
+  File::Temp: 0
+  String::Random: 0
+  Test::Fatal: 0
+  Test::More: 0
+  perl: 5.006
+configure_requires:
+  ExtUtils::MakeMaker: 6.31
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.200004, CPAN::Meta::Converter version 2.110580'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: App-JobLog
+no_index:
+  file:
+    - make_log.pl
+requires:
+  App::Cmd::Setup: 0
+  Carp: 0
+  Class::Autouse: 0
+  DateTime: 0
+  DateTime::TimeZone: 0
+  Exporter: 0
+  FileHandle: 0
+  IO::All: 0
+  Modern::Perl: 0
+  Text::Wrap: 0
+  Text::WrapI18N: 0
+  autouse: 0
+  constant: 0
+  overload: 0
+version: 1.000
