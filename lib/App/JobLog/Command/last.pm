@@ -1,6 +1,6 @@
 package App::JobLog::Command::last;
 BEGIN {
-  $App::JobLog::Command::last::VERSION = '1.000';
+  $App::JobLog::Command::last::VERSION = '1.001';
 }
 
 # ABSTRACT: show details of last recorded event
@@ -42,7 +42,7 @@ App::JobLog::Command::last - show details of last recorded event
 
 =head1 VERSION
 
-version 1.000
+version 1.001
 
 =head1 AUTHOR
 

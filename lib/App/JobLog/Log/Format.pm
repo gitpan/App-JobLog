@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 BEGIN {
-  $App::JobLog::Log::Format::VERSION = '1.000';
+  $App::JobLog::Log::Format::VERSION = '1.001';
 }
 
 # ABSTRACT: pretty printer for log
@@ -80,7 +80,7 @@ sub summary {
     # add in vacation times
     for my $p (@periods) {
         for my $d (@days) {
-            if ( is_workday( $d->start ) && $p->conflicts($d) ) {
+            if ( is_workday( $d->start ) && $p->conflicts($d->pseudo_event) ) {
                 my $clone = $p->clone;
                 $clone->start = $d->start;
                 if ( $clone->fixed ) {
@@ -327,7 +327,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.000
+version 1.001
 
 =head1 DESCRIPTION
 

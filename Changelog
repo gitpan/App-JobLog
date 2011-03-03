@@ -1,3 +1,11 @@
+Revision history for App::JobLog
+
+1.001 ?
+  * fixed broken today --finish command
+
+1.000
+  * initial release; seems to be feature complete
+
 DFH, 13 Feb, 2011
 
 No changes yet!

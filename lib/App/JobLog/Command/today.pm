@@ -1,6 +1,6 @@
 package App::JobLog::Command::today;
 BEGIN {
-  $App::JobLog::Command::today::VERSION = '1.000';
+  $App::JobLog::Command::today::VERSION = '1.001';
 }
 
 # ABSTRACT: show what has happened today
@@ -9,6 +9,8 @@ use App::JobLog -command;
 use Modern::Perl;
 use App::JobLog::Command::summary;
 use autouse 'App::JobLog::Time' => qw(now);
+
+use constant FORMAT => '%l:%M:%S %p on %A, %B %d, %Y';
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -32,39 +34,19 @@ sub _when_finished {
     my ( $start, $opt ) = @_;
 
     my $remaining =
-      'App::JobLog::Command::summary'->execute( $opt, "$start - today" );
+      'App::JobLog::Command::summary'->execute( $opt, ["$start - today"] );
     if ( $remaining == 0 ) {
-        print "you are just now done\n";
+        say "\nyou are just now done";
     }
     else {
-        my $now  = now;
-        my $then = $now->clone;
-        $then->add( hours => $remaining );
-        my $duration = $then->subtract_datetime($now);
-        if ( $duration->days > 0 ) {
-            print 'you were done';
-            my ( $weeks, $days, $hours, $minutes, $seconds ) =
-              $duration->in_units( 'weeks', 'days', 'hours', 'minutes',
-                'seconds' );
-            no strict 'refs';
-            for my $period qw(weeks days hours minutes seconds) {
-                print ' ' . _grammatical_number( $period, $$period );
-            }
-            printf " %s\n", $remaining < 0 ? 'ago' : 'from now';
+        my $then = now->add( seconds => $remaining );
+        if ( $then < now ) {
+            say "\nyou were finished at " . $then->strftime(FORMAT);
         }
         else {
-            printf "you %s done at %s\n",
-              $remaining < 0 ? 'were' : 'will be',
-              $then->strftime('%l:%M %p');
+            say "\nyou will be finished at " . $then->strftime(FORMAT);
         }
     }
-}
-
-sub _grammatical_number {
-    my ( $term, $units ) = @_;
-    my $base = " $units $term";
-    $base = $base . 's' if $units > 1;
-    return $base;
 }
 
 sub usage_desc { '%c ' . __PACKAGE__->name . ' %o' }
@@ -101,7 +83,7 @@ App::JobLog::Command::today - show what has happened today
 
 =head1 VERSION
 
-version 1.000
+version 1.001
 
 =head1 AUTHOR
 

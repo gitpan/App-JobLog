@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 BEGIN {
-  $App::JobLog::Log::Day::VERSION = '1.000';
+  $App::JobLog::Log::Day::VERSION = '1.001';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -141,11 +141,14 @@ sub _gather {
 
 sub pseudo_event {
     my ($self) = @_;
-    my $e =
-      App::JobLog::Log::Event->new(
-        App::JobLog::Log::Line->new( time => $self->start ) );
-    $e->end = $self->end;
-    return $e;
+    unless ( $self->{pseudo_event} ) {
+        my $e =
+          App::JobLog::Log::Event->new(
+            App::JobLog::Log::Line->new( time => $self->start ) );
+        $e->end = $self->end;
+        $self->{pseudo_event} = $e;
+    }
+    return $self->{pseudo_event};
 }
 
 1;
@@ -159,7 +162,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.000
+version 1.001
 
 =head1 DESCRIPTION
 
