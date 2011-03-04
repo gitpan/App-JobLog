@@ -1,6 +1,6 @@
 package App::JobLog::Log::Line;
 BEGIN {
-  $App::JobLog::Log::Line::VERSION = '1.001';
+  $App::JobLog::Log::Line::VERSION = '1.002';
 }
 
 # ABSTRACT: encapsulates one line of log text
@@ -30,7 +30,7 @@ our $re = qr{
      (?<tags> (?:(?&tag)(\s++(?&tag))*+)?)
      (?<tag> ((?:[^\s:\\]|(?&escaped))++) (?{push @tags, $^N}))
      (?<escaped> \\.)
-     (?<descriptions> (?: (?&description) (?: ; (?&description) )*+ )? )
+     (?<descriptions> (?: (?&description) (?: ; \s*+ (?&description) )*+ )? )
      (?<description> ((?:[^;\\]|(?&escaped))++) (?{push @description, $^N}))
     )
 }xi;
@@ -127,8 +127,14 @@ sub parse {
             my %tags = map { $_ => 1 } @tags;
             $obj->{tags} =
               [ map { ( my $v = $_ ) =~ s/\\(.)/$1/g; $v } sort keys %tags ];
-            $obj->{description} =
-              [ map { ( my $v = $_ ) =~ s/\\(.)/$1/g; $v } @description ];
+            $obj->{description} = [
+                map {
+                    ( my $v = $_ ) =~ s/\\(.)/$1/g;
+                    $v =~ s/^\s++|\s++$//g;
+                    $v =~ s/\s++/ /g;
+                    $v
+                  } @description
+            ];
         }
         else {
             $obj->{done} = 1;
@@ -273,7 +279,7 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 

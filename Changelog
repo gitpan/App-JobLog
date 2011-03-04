@@ -1,11 +1,11 @@
 Revision history for App::JobLog
 
-1.001 ?
+1.002 4 March, 2011
+  * added normalization of whitespace in log
+  * added options to summary and configuration to allow the hiding of various fields
+
+1.001 3 March, 2011
   * fixed broken today --finish command
 
-1.000
+1.000 3 March, 2011
   * initial release; seems to be feature complete
-
-DFH, 13 Feb, 2011
-
-No changes yet!

@@ -1,7 +1,4 @@
-March 3, 2011
-
 complete test suite
 remove unused code
 refactor repeated code into methods
-add more control over display in summary
 add CSV output

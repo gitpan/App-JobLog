@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 BEGIN {
-  $App::JobLog::Log::Day::VERSION = '1.001';
+  $App::JobLog::Log::Day::VERSION = '1.002';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -87,15 +87,18 @@ sub display {
     # cache some bits from the $columns hash
     my ( $show_times, $show_durations, $show_tags, $show_descriptions ) =
       @{ $columns->{formats} }{qw(time duration tags description)};
+    my $show_date = $columns->{date};
     my ( $tag_width, $description_width ) =
       @{ $columns->{widths} }{qw(tags description)};
 
     # date
-    my $f =
-      !( $previous && $previous->start->year == $self->start->year )
-      ? '%A, %e %B, %Y'
-      : '%A, %e %B';
-    print $self->start->strftime($f), "\n";
+    if ($show_date) {
+        my $f =
+          !( $previous && $previous->start->year == $self->start->year )
+          ? '%A, %e %B, %Y'
+          : '%A, %e %B';
+        print $self->start->strftime($f), "\n";
+    }
 
     # activities
     for my $s ( @{ $self->synopses } ) {
@@ -111,7 +114,12 @@ sub display {
             say sprintf $format, _gather( \@lines, $i );
         }
     }
-    print "\n";
+    print "\n"
+      if $show_times
+          || $show_durations
+          || $show_tags
+          || $show_descriptions
+          || $show_date;
 }
 
 # add blank lines to short columns
@@ -162,7 +170,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 

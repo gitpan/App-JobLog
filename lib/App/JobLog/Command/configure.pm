@@ -1,6 +1,6 @@
 package App::JobLog::Command::configure;
 BEGIN {
-  $App::JobLog::Command::configure::VERSION = '1.001';
+  $App::JobLog::Command::configure::VERSION = '1.002';
 }
 
 # ABSTRACT: examine or modify App::JobLog configuration
@@ -10,6 +10,7 @@ use Modern::Perl;
 use App::JobLog::Config qw(
   day_length
   editor
+  hidden_columns
   merge
   pay_period_length
   precision
@@ -17,8 +18,10 @@ use App::JobLog::Config qw(
   sunday_begins_week
   workdays
   DAYS
+  HIDABLE_COLUMNS
   HOURS
   MERGE
+  NONE_COLUMN
   PERIOD
   PRECISION
   SUNDAY_BEGINS_WEEK
@@ -83,6 +86,13 @@ sub execute {
         my $value = editor( $opt->editor );
         say "log editor is now $value";
     }
+    if ( defined $opt->hidden_columns ) {
+        my @cols = map { my $v = $_; lc $v } @{ $opt->hidden_columns };
+        my %cols = map { $_ => 1 } @cols;
+        my $value = join ' ', sort keys %cols;
+        $value = hidden_columns($value);
+        say "hidden columns: $value";
+    }
 }
 
 sub usage_desc { '%c ' . __PACKAGE__->name . ' %o' }
@@ -135,6 +145,16 @@ sub options {
               . "'adjacent same tags', 'adjacent', 'all', 'none', 'same day same tags', 'same day', 'same tags'; "
               . "default is '@{[MERGE]}'"
         ],
+        [
+            'hidden-columns=s@',
+            'columns not to display with the '
+              . App::JobLog::Command::summary->name
+              . ' command; '
+              . 'available options are: '
+              . join( ', ', map { "'$_'" } @{HIDABLE_COLUMNS()} ) . '; '
+              . "default is '@{[NONE_COLUMN]}'; "
+              . 'multiple columns may be specified'
+        ],
         [ 'editor=s', 'text editor to use when manually editing the log' ],
         [ 'list|l',   'list all configuration parameters' ],
     );
@@ -148,6 +168,7 @@ sub _list_params {
       precision
       day_length
       editor
+      hidden_columns
       merge
       pay_period_length
       start_pay_period
@@ -199,7 +220,23 @@ sub validate {
             $self->usage_error( 'unknown merge option: ' . $opt->merge );
         }
     }
-
+    if ( defined $opt->hidden_columns ) {
+        my %h = map { $_ => 1 } @{HIDABLE_COLUMNS()};
+        my ( $found_none, $found_something ) = ( 0, 0 );
+        for my $c ( @{ $opt->hidden_columns } ) {
+            my $col = lc $c;
+            $self->usage_error("unknown column: $c") unless $h{$col};
+            if ( $col eq NONE_COLUMN ) {
+                $found_none ||= 1;
+            }
+            else {
+                $found_something ||= 1;
+            }
+        }
+        $self->usage_error(
+"you have specified that something should be hidden and that nothing should be hidden"
+        ) if $found_none && $found_something;
+    }
 }
 
 1;
@@ -214,7 +251,7 @@ App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 

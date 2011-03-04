@@ -1,6 +1,6 @@
 package App::JobLog::Config;
 BEGIN {
-  $App::JobLog::Config::VERSION = '1.001';
+  $App::JobLog::Config::VERSION = '1.002';
 }
 
 # ABSTRACT: central depot for App::JobLog configuration parameters and controller allowing their modification
@@ -12,7 +12,9 @@ our @EXPORT_OK = qw(
   day_length
   dir
   editor
+  hidden_columns
   init_file
+  is_hidden
   is_workday
   log
   merge
@@ -25,8 +27,10 @@ our @EXPORT_OK = qw(
   workdays
   DAYS
   DIRECTORY
+  HIDABLE_COLUMNS
   HOURS
   MERGE
+  NONE_COLUMN
   PERIOD
   PRECISION
   SUNDAY_BEGINS_WEEK
@@ -71,6 +75,20 @@ use constant DAYS => 'S' . WORKDAYS . 'A';
 
 # default level of merging
 use constant MERGE => 'adjacent same tags';
+
+# name of hide nothing "column"
+use constant NONE_COLUMN     => 'none';
+
+# array of hidable columns
+use constant HIDABLE_COLUMNS => [
+    NONE_COLUMN, qw(
+      date
+      description
+      duration
+      tags
+      time
+      )
+];
 
 
 sub init_file {
@@ -273,6 +291,23 @@ sub is_workday {
     return $workdays{ $date->day_of_week };
 }
 
+
+sub hidden_columns {
+    my ($value) = @_;
+    return _param( 'hidden_columns', NONE_COLUMN, 'summary', $value );
+}
+
+
+my %hidden_columns;
+
+sub is_hidden {
+    my ($value) = @_;
+    unless (%hidden_columns) {
+        %hidden_columns = map { $_ => 1 } split / /, hidden_columns();
+    }
+    return $hidden_columns{$value};
+}
+
 1;
 
 __END__
@@ -284,7 +319,7 @@ App::JobLog::Config - central depot for App::JobLog configuration parameters and
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 
@@ -357,6 +392,14 @@ The days of the week when one expects to be working.
 =head2 is_workday
 
 Returns whether a particular L<DateTime> object represents a workday.
+
+=head2 hidden_columns
+
+Returns those columns never displayed by summary command.
+
+=head2 is_hidden
+
+Whether a particular column is among those hidden.
 
 =head1 AUTHOR
 

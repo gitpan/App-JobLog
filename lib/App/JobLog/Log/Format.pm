@@ -1,15 +1,16 @@
 package App::JobLog::Log::Format;
 BEGIN {
-  $App::JobLog::Log::Format::VERSION = '1.001';
+  $App::JobLog::Log::Format::VERSION = '1.002';
 }
 
 # ABSTRACT: pretty printer for log
 
 
 use Exporter 'import';
-our @EXPORT = qw(
+our @EXPORT_OK = qw(
   display
   duration
+  single_interval
   summary
   wrap
 );
@@ -31,7 +32,7 @@ use constant DURATION_FORMAT  => '%0.' . precision . 'f';
 
 
 sub summary {
-    my ( $phrase, $test ) = @_;
+    my ( $phrase, $test, $hidden ) = @_;
 
     # we skip flex days if the events are at all filtered
     my $skip_flex = $test || 0;
@@ -44,10 +45,11 @@ sub summary {
     }
     my $events = App::JobLog::Log->new->find_events( $start, $end );
     my @days = @{ _days( $start, $end, $skip_flex ) };
-    my @periods = App::JobLog::Vacation->new->periods;
+    my @periods =
+      $hidden->{vacation} ? () : App::JobLog::Vacation->new->periods;
 
     # drop the vacation days that can't be relevant
-    {
+    unless ( $hidden->{vacation} ) {
         my $e =
           App::JobLog::Log::Event->new(
             App::JobLog::Log::Line->new( time => $start ) );
@@ -80,7 +82,8 @@ sub summary {
     # add in vacation times
     for my $p (@periods) {
         for my $d (@days) {
-            if ( is_workday( $d->start ) && $p->conflicts($d->pseudo_event) ) {
+            if ( is_workday( $d->start ) && $p->conflicts( $d->pseudo_event ) )
+            {
                 my $clone = $p->clone;
                 $clone->start = $d->start;
                 if ( $clone->fixed ) {
@@ -169,7 +172,7 @@ sub _days {
 
 
 sub display {
-    my ( $days, $merge_level ) = @_;
+    my ( $days, $merge_level, $hidden ) = @_;
 
     # TODO augment events with vacation and holidays
     if (@$days) {
@@ -178,10 +181,11 @@ sub display {
 
         # in the future we will allow more of these values to be toggled
         my $columns = {
-            time        => _single_interval($merge_level),
-            tags        => 1,
-            description => 1,
-            duration    => 1
+            time => single_interval($merge_level) && !$hidden->{time},
+            date => !$hidden->{date},
+            tags => !$hidden->{tags},
+            description => !$hidden->{description},
+            duration    => !$hidden->{duration},
         };
         my $format = _define_format( \@synopses, $columns );
 
@@ -202,25 +206,27 @@ sub display {
             $previous = $d;
         }
 
-        my ( $m1, $m2 ) =
-          ( length 'TOTAL HOURS', length duration( $times->{total} ) );
-        my @keys = keys %{ $times->{tags} };
-        push @keys, 'UNTAGGED' if $times->{untagged};
-        push @keys, 'VACATION' if $times->{vacation};
-        for my $tag (@keys) {
-            my $l = length $tag;
-            $m1 = $l if $l > $m1;
-        }
-        $format = sprintf "  %%-%ds %%%ds\n", $m1, $m2;
-        printf $format, 'TOTAL HOURS', duration( $times->{total} );
-        printf $format, 'VACATION',    duration( $times->{vacation} )
-          if $times->{vacation};
-        if ( %{ $times->{tags} } ) {
-            printf $format, 'UNTAGGED', duration( $times->{untagged} )
-              if $times->{untagged};
-            for my $key ( sort keys %{ $times->{tags} } ) {
-                my $d = $times->{tags}{$key};
-                printf $format, $key, duration($d);
+        unless ( $hidden->{totals} ) {
+            my ( $m1, $m2 ) =
+              ( length 'TOTAL HOURS', length duration( $times->{total} ) );
+            my @keys = keys %{ $times->{tags} };
+            push @keys, 'UNTAGGED' if $times->{untagged};
+            push @keys, 'VACATION' if $times->{vacation};
+            for my $tag (@keys) {
+                my $l = length $tag;
+                $m1 = $l if $l > $m1;
+            }
+            $format = sprintf "  %%-%ds %%%ds\n", $m1, $m2;
+            printf $format, 'TOTAL HOURS', duration( $times->{total} );
+            printf $format, 'VACATION',    duration( $times->{vacation} )
+              if $times->{vacation};
+            if ( %{ $times->{tags} } ) {
+                printf $format, 'UNTAGGED', duration( $times->{untagged} )
+                  if $times->{untagged};
+                for my $key ( sort keys %{ $times->{tags} } ) {
+                    my $d = $times->{tags}{$key};
+                    printf $format, $key, duration($d);
+                }
             }
         }
     }
@@ -306,8 +312,8 @@ sub wrap {
     return \@ar;
 }
 
-# determines from merge level whether event times should be displayed
-sub _single_interval {
+
+sub single_interval {
     $_[0] == MERGE_ADJACENT
       || $_[0] == MERGE_ADJACENT_SAME_TAGS
       || $_[0] == MERGE_NONE;
@@ -327,7 +333,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 
@@ -349,6 +355,10 @@ Formats L<App::JobLog::Log::Synopsis> objects so they fit nicely on the screen.
 
 Wraps C<wrap> from L<Text::Wrap>. Expects a string and a number of columns.
 Returns a reference to an array of substrings wrapped to fit the columns.
+
+=head2
+
+Whether times should be displayed given the merge level.
 
 =head2 duration
 

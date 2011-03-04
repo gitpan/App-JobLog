@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.001';
+  $App::JobLog::Command::summary::VERSION = '1.002';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -13,11 +13,18 @@ use Class::Autouse qw(
   App::JobLog::Log
   App::JobLog::Log::Day
 );
-use autouse 'App::JobLog::TimeGrammar'   => qw(parse daytime);
-use autouse 'Carp'                       => qw(carp);
-use autouse 'Getopt::Long::Descriptive'  => qw(prog_name);
-use autouse 'App::JobLog::Config'        => qw(merge);
-use autouse 'App::JobLog::Log::Format'   => qw(display summary);
+use autouse 'App::JobLog::TimeGrammar'  => qw(parse daytime);
+use autouse 'Carp'                      => qw(carp);
+use autouse 'Getopt::Long::Descriptive' => qw(prog_name);
+use autouse 'App::JobLog::Config'       => qw(
+  is_hidden
+  merge
+);
+use autouse 'App::JobLog::Log::Format' => qw(
+  display
+  single_interval
+  summary
+);
 use autouse 'App::JobLog::Log::Synopsis' => qw(
   MERGE_ALL
   MERGE_ADJACENT
@@ -75,13 +82,38 @@ sub execute {
             $merge_level = &$m;
         }
     }
+    my $dateless = $merge_level == MERGE_ALL || $merge_level == MERGE_SAME_TAGS;
+    if (
+           $opt->{no_totals}
+        && ( $dateless || $opt->{no_date} || is_hidden('date') )
+        && (   !single_interval($merge_level)
+            || $opt->{no_time}
+            || is_hidden('time') )
+        && ( $opt->{no_duration}    || is_hidden('duration') )
+        && ( $opt->{no_tags}        || is_hidden('tags') )
+        && ( $opt->{no_description} || is_hidden('description') )
+      )
+    {
+        $self->usage_error('you have chosen not to display anything');
+    }
+
+    # record hiding options in hash reference
+    my $hidden = {
+        vacation    => $opt->{no_vacation},
+        date        => $opt->{no_date} || is_hidden('date'),
+        time        => $opt->{no_time} || is_hidden('time'),
+        duration    => $opt->{no_duration} || is_hidden('duration'),
+        tags        => $opt->{no_tags} || is_hidden('tags'),
+        description => $opt->{no_description} || is_hidden('description'),
+        totals      => $opt->{no_totals},
+    };
 
     # parse time expression
     my $days;
-    eval { $days = summary join( ' ', @$args ), $test; };
+    eval { $days = summary join( ' ', @$args ), $test, $hidden };
     $self->usage_error($@) if $@;
     unless ( $opt->{hidden} ) {
-        if ( $merge_level == MERGE_ALL || $merge_level == MERGE_SAME_TAGS ) {
+        if ($dateless) {
 
             # create "day" containing all events
             my $duck_day = App::JobLog::Log::Day->new(
@@ -93,10 +125,10 @@ sub execute {
                 push @{ $duck_day->events },   @{ $d->events };
                 push @{ $duck_day->vacation }, @{ $d->vacation };
             }
-            display [$duck_day], $merge_level;
+            display [$duck_day], $merge_level, $hidden;
         }
         else {
-            display $days, $merge_level;
+            display $days, $merge_level, $hidden;
         }
     }
     my $t = 0;
@@ -315,6 +347,16 @@ sub options {
                 ]
             }
         ],
+        [ 'no-vacation|V',  'do not display vacation hours' ],
+        [ 'no-date',        'do not display a date before each distinct day' ],
+        [ 'no-time',        'do not display event start and end times' ],
+        [ 'no-duration',    'do not display event durations' ],
+        [ 'no-tags',        'do not display tags' ],
+        [ 'no-description', 'do not display event descriptions' ],
+        [
+            'no-totals',
+            'do not display the footer containing total hours worked, etc.'
+        ],
         [ 'hidden', 'display nothing', { hidden => 1 } ],
     );
 }
@@ -337,7 +379,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 

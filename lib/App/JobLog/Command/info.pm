@@ -1,6 +1,6 @@
 package App::JobLog::Command::info;
 BEGIN {
-  $App::JobLog::Command::info::VERSION = '1.001';
+  $App::JobLog::Command::info::VERSION = '1.002';
 }
 
 # ABSTRACT: provides general App::JobLog information
@@ -333,7 +333,7 @@ App::JobLog::Command::info - provides general App::JobLog information
 
 =head1 VERSION
 
-version 1.001
+version 1.002
 
 =head1 DESCRIPTION
 
