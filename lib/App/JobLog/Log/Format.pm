@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 BEGIN {
-  $App::JobLog::Log::Format::VERSION = '1.002';
+  $App::JobLog::Log::Format::VERSION = '1.003';
 }
 
 # ABSTRACT: pretty printer for log
@@ -85,15 +85,12 @@ sub summary {
             if ( is_workday( $d->start ) && $p->conflicts( $d->pseudo_event ) )
             {
                 my $clone = $p->clone;
-                $clone->start = $d->start;
                 if ( $clone->fixed ) {
-                    $clone->end = $d->end;
                     push @{ $d->events }, $clone->overlap( $d->start, $d->end );
                 }
                 else {
+                    $clone->start = $d->start->clone;
                     if ( $clone->flex ) {
-                        $clone->end = $clone->start->clone->add(
-                            seconds => $d->time_remaining );
                         $d->{deferred} = $clone;
                     }
                     else {
@@ -122,10 +119,10 @@ sub summary {
         if ($flex) {
             delete $d->{deferred};
             my $tr = $d->time_remaining;
-            if ($tr) {
+            if ($tr > 0) {
                 $flex->end = $flex->start->clone->add( seconds => $tr );
+                push @events, $flex;
             }
-            push @events, $flex;
         }
         $d->{events} = [ sort { $a->cmp($b) } @events ] if @events > 1;
     }
@@ -333,7 +330,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 
@@ -343,13 +340,19 @@ This module handles word wrapping, date formatting, and the like.
 
 =head2 time_remaining
 
-Determines the time remaining to work in the given period.
-Accepts a reference to an array of L<App::JobLog::Log::Event> objects
-and returns an integer representing a number of seconds.
+Obtains a properly filtered list of L<App::JobLog::Log::Day> objects for
+a given time expression, code reference to event filtering closure, and
+hash specifying fields to hide in report. Returns reference to list of days.
+
+If C<undef> is passed in as the code reference a dummy closure is constructed
+that returns the argument passed in unmodified.
 
 =head2 display
 
-Formats L<App::JobLog::Log::Synopsis> objects so they fit nicely on the screen.
+Augments L<App::JobLog::Log::Day> objects with appropriate L<App::JobLog::Log::Synopsis> objects
+given the merge level and hidden fields. Expects a reference to a list of days, the merge level,
+and a reference to the hidden columns hash. Prints synopses to STDOUT along with aggregate
+statistics for the interval.
 
 =head2 wrap
 

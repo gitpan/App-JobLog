@@ -1,6 +1,6 @@
 package App::JobLog::Command::done;
 BEGIN {
-  $App::JobLog::Command::done::VERSION = '1.002';
+  $App::JobLog::Command::done::VERSION = '1.003';
 }
 
 # ABSTRACT: close last open event
@@ -12,7 +12,14 @@ use Class::Autouse 'App::JobLog::Log';
 sub execute {
     my ( $self, $opt, $args ) = @_;
 
-    App::JobLog::Log->new->append_event( done => 1 );
+    my $log = App::JobLog::Log->new;
+    my ($last) = $log->last_event;
+    if ( $last->is_open ) {
+        $log->append_event( done => 1 );
+    }
+    else {
+        say 'No currently open event in log.';
+    }
 }
 
 sub usage_desc { '%c ' . __PACKAGE__->name }
@@ -21,7 +28,8 @@ sub abstract { 'mark current task as done' }
 
 1;
 
-__END__
+
+
 =pod
 
 =head1 NAME
@@ -30,7 +38,22 @@ App::JobLog::Command::done - close last open event
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job done
+ houghton@NorthernSpy:~$ 
+
+=head1 DESCRIPTION
+
+When you invoke L<App::JobLog::Command::add> to append a new event to the log this moment
+also marks the end of any previous event. If an event is ongoing and you simply wish to mark its
+end -- if you're signing off for the day, for example -- use B<App::JobLog::Command::done>.
+
+=head1 SEE ALSO
+
+L<App::JobLog::Command::add>, L<App::JobLog::Command::resume>
 
 =head1 AUTHOR
 
@@ -44,4 +67,7 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
 

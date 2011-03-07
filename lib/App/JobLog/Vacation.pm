@@ -1,6 +1,6 @@
 package App::JobLog::Vacation;
 BEGIN {
-  $App::JobLog::Vacation::VERSION = '1.002';
+  $App::JobLog::Vacation::VERSION = '1.003';
 }
 
 # ABSTRACT: controller for the vacation model
@@ -117,7 +117,7 @@ sub show {
         }
     }
     return [] unless @parts;
-    my $format = sprintf "%%%dd) %%%ds %%-%ds %%-%ds %%-%ds\n", scalar(@parts),
+    my $format = sprintf "%%%dd) %%%ds %%-%ds %%-%ds %%-%ds\n", length scalar(@parts),
       @$widths;
     for my $i ( 0 .. $#parts ) {
         $parts[$i] = sprintf $format, $i + 1, @{ $parts[$i] };
@@ -165,7 +165,7 @@ App::JobLog::Vacation - controller for the vacation model
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 

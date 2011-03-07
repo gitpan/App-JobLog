@@ -1,6 +1,6 @@
 package App::JobLog::Command::edit;
 BEGIN {
-  $App::JobLog::Command::edit::VERSION = '1.002';
+  $App::JobLog::Command::edit::VERSION = '1.003';
 }
 
 # ABSTRACT: edit the log
@@ -18,19 +18,31 @@ use autouse 'Digest::MD5'               => qw(md5);
 use autouse 'App::JobLog::Config'       => qw(editor log);
 use autouse 'Getopt::Long::Descriptive' => qw(prog_name);
 use autouse 'App::JobLog::TimeGrammar'  => qw(parse);
+use autouse 'App::JobLog::Time'         => qw(now);
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
-    if ( $opt->close ) {
-        my $time = join ' ', @$args;
+    if ( $opt->close || $opt->validate ) {
         eval {
-            my ($s) = parse($time);
             my $log = App::JobLog::Log->new;
-            my ( $e, $i ) = $log->find_previous($s);
-            $self->usage_error('log does not contain appropriate event')
-              unless $e;
-            $log->insert( $i + 1,
-                App::JobLog::Log::Line->new( time => $s, done => 1 ) );
+            if ( $opt->close ) {
+                my $time = join ' ', @$args;
+                my ($s) = parse($time);
+                $self->usage_error(
+                    'you may only insert closing times prior to present')
+                  unless $s < now;
+                my ( $e, $i ) = $log->find_previous($s);
+                $self->usage_error('log does not contain appropriate event')
+                  unless $e;
+                $self->usage_error('no open event at this time')
+                  unless $e->is_open;
+                $log->insert( $i + 1,
+                    App::JobLog::Log::Line->new( time => $s, done => 1 ) );
+            }
+            if ( $opt->validate ) {
+                my $errors = $log->validate;
+                _error_report($errors);
+            }
         };
         $self->usage_error($@) if $@;
     }
@@ -51,7 +63,8 @@ sub execute {
                 copy( $fn, $fh );
                 $fh->close;
                 say "saved backup log in $log.bak";
-                App::JobLog::Log->new->validate;
+                my $errors = App::JobLog::Log->new->validate;
+                _error_report($errors);
             }
             else {
                 unlink $fn;
@@ -66,7 +79,9 @@ sub execute {
     }
 }
 
-sub usage_desc { '%c ' . __PACKAGE__->name . ' [-c <date and time>]' }
+sub usage_desc {
+    '%c ' . __PACKAGE__->name . ' [--validate] [-c <date and time>]';
+}
 
 sub abstract { 'open a text editor to edit the log' }
 
@@ -108,7 +123,20 @@ sub options {
             'close|close-task|c' =>
               'add a "DONE" line to the log at the specified moment'
         ],
+        [ 'validate|v' => 'check log for errors, commenting out any found' ],
     );
+}
+
+sub _error_report {
+    my $errors = shift;
+
+    if ($errors) {
+        say "errors found: $errors";
+        say 'Error messages have been inserted into the log. Please edit.';
+    }
+    else {
+        say 'log is valid';
+    }
 }
 
 sub validate {
@@ -131,12 +159,57 @@ App::JobLog::Command::edit - edit the log
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job edit --help
+ job <command>
+ 
+ job edit [--validate] [-c <date and time>]
+ 	-c --close-task --close  add a "DONE" line to the log at the specified
+ 	                        moment
+ 	-v --validate           check log for errors, commenting out any found
+ 	--help                  this usage screen
+ houghton@NorthernSpy:~$ job today
+ Monday,  7 March, 2011
+   8:01 am - ongoing  4.56  bar, foo  something to add; and still more                                                                                                  
+ 
+   TOTAL HOURS 4.56
+   bar         4.56
+   foo         4.56
+ houghton@NorthernSpy:~$ job e --close today at 8:05
+ houghton@NorthernSpy:~$ job t
+ Monday,  7 March, 2011
+   8:01 - 8:05 am  0.05  bar, foo  something to add; and still more                                                                                                  
+ 
+   TOTAL HOURS 0.05
+   bar         0.05
+   foo         0.05
+ houghton@NorthernSpy:~$ job e
+
+A text editor opens up displaying the log. Appropriate edits are performed. The user saves and quits.
+
+ saved backup log in /home/houghton/.joblog/log.bak
+ log is valid
+ houghton@NorthernSpy:~$ 
 
 =head1 DESCRIPTION
 
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
+Generally you won't have need to modify the log except through L<App::JobLog::Command::add>, L<App::JobLog::Command::done>,
+L<App::JobLog::Command::modify>, or L<App::JobLog::Command::resume>. There will sometimes be glitches, though: you will
+be away from the log when you do something or you will quit for the day without having punched out with L<App::JobLog::Command::done>.
+This is when you need B<App::JobLog::Command::edit>.
+
+Most of the time you will simply need to add a missing I<DONE> line -- the B<--close> option. For this you need no text editor external to
+L<App::JobLog> itself. If you need a full function editor you will need to define the I<editor> parameter using L<App::JobLog::Command::configure>.
+Then invoke this command without any options or arguments.
+
+When you invoke the editor, L<App::JobLog> reviews the log after you save, commenting out ill-formed lines and emitting warnings.
+
+=head1 SEE ALSO
+
+L<App::JobLog::Command::modify>
 
 =head1 AUTHOR
 

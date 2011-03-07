@@ -1,11 +1,9 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.002';
+  $App::JobLog::Command::summary::VERSION = '1.003';
 }
 
 # ABSTRACT: show what you did during a particular period
-
-# TODO: hide vacation; hide time and tags columns
 
 use App::JobLog -command;
 use Modern::Perl;
@@ -99,11 +97,11 @@ sub execute {
 
     # record hiding options in hash reference
     my $hidden = {
-        vacation    => $opt->{no_vacation},
-        date        => $opt->{no_date} || is_hidden('date'),
-        time        => $opt->{no_time} || is_hidden('time'),
-        duration    => $opt->{no_duration} || is_hidden('duration'),
-        tags        => $opt->{no_tags} || is_hidden('tags'),
+        vacation => $opt->{no_vacation},
+        date     => $dateless || $opt->{no_date} || is_hidden('date'),
+        time        => $opt->{no_time}        || is_hidden('time'),
+        duration    => $opt->{no_duration}    || is_hidden('duration'),
+        tags        => $opt->{no_tags}        || is_hidden('tags'),
         description => $opt->{no_description} || is_hidden('description'),
         totals      => $opt->{no_totals},
     };
@@ -379,12 +377,122 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job summary --help
+ job <command>
+ 
+ job summary [-iMmTtV] [long options...] <date or date range>
+ 	Use 'job help summary' to see full details.
+ 	                                  
+ 	-t --tag                            filter events to include only
+ 	                                    those with given tags; multiple
+ 	                                    tags may be specified
+ 	-T --exclude-tag                    filter events to exclude those
+ 	                                    with given tags; multiple tags
+ 	                                    may be specified
+ 	-m --match                          filter events to include only
+ 	                                    those one of whose descriptions
+ 	                                    matches the given regex; multiple
+ 	                                    regexes may be specified
+ 	-M --no-match                       filter events to include only
+ 	                                    those one of whose descriptions
+ 	                                    do not match the given regex;
+ 	                                    multiple regexes may be specified
+ 	-i --time                           consider only those portions of
+ 	                                    events that overlap the given
+ 	                                    time range
+ 	--ma --mall --merge-all             glom all events into one synopsis
+ 	--madj --merge-adjacent             merge contiguous events
+ 	--mast --merge-adjacent-same-tags   merge contiguous,
+ 	                                    identically-tagged events
+ 	                                    (default)
+ 	--mst --merge-same-tags             merge all identically tagged
+ 	                                    events
+ 	--msd --merge-same-day              merge all events in a given day
+ 	--msdst --merge-same-day-same-tags  merge all events in a given day
+ 	--nm --no-merge                     keep all events separate
+ 	-V --no-vacation                    do not display vacation hours
+ 	--no-date                           do not display a date before each
+ 	                                    distinct day
+ 	--no-time                           do not display event start and
+ 	                                    end times
+ 	--no-duration                       do not display event durations
+ 	--no-tags                           do not display tags
+ 	--no-description                    do not display event descriptions
+ 	--no-totals                         do not display the footer
+ 	                                    containing total hours worked,
+ 	                                    etc.
+ 	--help                              this usage screen
+ houghton@NorthernSpy:~$ job s this week
+ Sunday,  6 March, 2011
+      7:36 - 7:37 pm  0.01  bar, foo  something to add; and still more                                                                                                  
+ 
+ Monday,  7 March
+   8:01 am - ongoing  1.05  bar, foo  something to add; and still more                                                                                                  
+ 
+   TOTAL HOURS 1.07
+   bar         1.07
+   foo         1.07
+ houghton@NorthernSpy:~$ job s this month
+ Tuesday,  1 March, 2011
+      8:00 - 9:23 am  1.39  widgets   adding handling of simplified pdf docs                                                                                            
+ 
+ Friday,  4 March
+      1:48 - 2:55 pm  1.11  widgets   trying to get Eclipse working properly again                                                                                      
+      3:50 - 5:30 pm  1.66  widgets   figuring out why some files are really, really slow                                                                               
+ 
+ Sunday,  6 March
+      7:36 - 7:37 pm  0.01  bar, foo  something to add; and still more                                                                                                  
+ 
+ Monday,  7 March
+   8:01 am - ongoing  1.05  bar, foo  something to add; and still more                                                                                                  
+ 
+   TOTAL HOURS 5.23
+   bar         1.07
+   foo         1.07
+   widgets     4.16
+ houghton@NorthernSpy:~$ job s 2011/3/1
+ Tuesday,  1 March, 2011
+   8:00 - 9:23 am  1.39  widgets  adding handling of simplified pdf docs                                                                                            
+ 
+   TOTAL HOURS 1.39
+   widgets     1.39
+ houghton@NorthernSpy:~$ job s Friday through today
+ Friday,  4 March, 2011
+      1:48 - 2:55 pm  1.11  widgets   trying to get Eclipse working properly again                                                                                      
+      3:50 - 5:30 pm  1.66  widgets   figuring out why some files are really, really slow                                                                               
+ 
+ Sunday,  6 March
+      7:36 - 7:37 pm  0.01  bar, foo  something to add; and still more                                                                                                  
+ 
+ Monday,  7 March
+   8:01 am - ongoing  1.06  bar, foo  something to add; and still more                                                                                                  
+ 
+   TOTAL HOURS 3.84
+   bar         1.07
+   foo         1.07
+   widgets     2.77
+ houghton@NorthernSpy:~$ job s --merge-same-tags Friday through today
+ Friday,  4 March, 2011
+   2.77  widgets   trying to get Eclipse working properly again; figuring out why some files are really, really slow                                   
+   1.07  bar, foo  something to add; and still more                                                                                                    
+ 
+   TOTAL HOURS 3.85
+   bar         1.07
+   foo         1.07
+   widgets     2.77
 
 =head1 DESCRIPTION
 
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
+B<App::JobLog::Command::summary> is the command that extracts pretty reports from the log. Its options are all
+concerned with filtering events and formatting the report.
+
+=head1 SEE ALSO
+
+L<App::JobLog::Command::today>, L<App::JobLog::Command::last>, L<App::JobLog::TimeGrammar>
 
 =head1 AUTHOR
 

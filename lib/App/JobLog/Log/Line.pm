@@ -1,9 +1,10 @@
 package App::JobLog::Log::Line;
 BEGIN {
-  $App::JobLog::Log::Line::VERSION = '1.002';
+  $App::JobLog::Log::Line::VERSION = '1.003';
 }
 
 # ABSTRACT: encapsulates one line of log text
+
 
 use Modern::Perl;
 use Class::Autouse qw{DateTime};
@@ -35,7 +36,7 @@ our $re = qr{
     )
 }xi;
 
-# for composing a log line out of a hash of attributes
+
 sub new {
     my ( $class, @args ) = @_;
     $class = ref $class || $class;
@@ -96,7 +97,7 @@ sub new {
     return $self;
 }
 
-# for parsing a line in an existing log
+
 sub parse {
     my ( $class, $text ) = @_;
     my $obj = bless { text => $text }, $class;
@@ -147,6 +148,7 @@ sub parse {
     return $obj;
 }
 
+
 sub clone {
     my ($self) = @_;
     my $clone = bless {}, ref $self;
@@ -167,6 +169,7 @@ sub clone {
     }
     return $clone;
 }
+
 
 sub to_string {
     my ($self) = @_;
@@ -194,6 +197,7 @@ sub to_string {
     }
 }
 
+
 sub time_stamp {
     my ( $self, $time ) = @_;
     $time ||= $self->time;
@@ -204,21 +208,26 @@ sub time_stamp {
 
 # a bunch of attributes, here for convenience
 
+
 sub text : lvalue {
     $_[0]->{text};
 }
+
 
 sub tags : lvalue {
     $_[0]->{tags};
 }
 
+
 sub comment : lvalue {
     $_[0]->{comment};
 }
 
+
 sub time : lvalue {
     $_[0]->{time};
 }
+
 
 sub description : lvalue {
     $_[0]->{description};
@@ -226,18 +235,31 @@ sub description : lvalue {
 
 # a bunch of tests
 
+
 sub is_malformed     { exists $_[0]->{malformed} }
+
+
 sub is_beginning     { exists $_[0]->{tags} }
+
+
 sub is_end           { $_[0]->{done} }
-sub is_event         { exists $_[0]->{time} }
+
+
+sub is_event         { $_[0]->{time} }
+
+
 sub is_comment       { exists $_[0]->{comment} }
+
+
 sub tags_unspecified { $_[0]->{tags_unspecified} }
+
 
 sub is_blank {
     !( $_[0]->is_malformed || $_[0]->is_comment || $_[0]->is_event );
 }
 
 # some useful methods
+
 
 sub comment_out {
     my ($self) = @_;
@@ -246,6 +268,7 @@ sub comment_out {
     $self->{comment} = $text;
     return $self;
 }
+
 
 sub all_tags {
     my ( $self, @tags ) = @_;
@@ -256,6 +279,7 @@ sub all_tags {
     }
     return 1;
 }
+
 
 sub exists_tag {
     my ( $self, @tags ) = @_;
@@ -269,8 +293,7 @@ sub exists_tag {
 
 1;
 
-
-
+__END__
 =pod
 
 =head1 NAME
@@ -279,12 +302,98 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
+B<App::JobLog::Log::Line> encapsulates a line of text from the log -- the semantics of such
+a line and the code required to construct, parse, or serialize it.
+
+=head1 METHODS
+
+=head2 new
+
+For composing a log line out of a hash of attributes.
+
+=head2 parse
+
+For parsing a line in an existing log. Expects string to parse as an argument.
+
+=head2 clone
+
+Produces an object semantically identical to that on which it was invoked but
+stored without shared references so changes to the latter will not effect the former.
+
+=head2 to_string
+
+Serializes object to the string that would represent it in a log.
+
+=head2 time_stamp
+
+Represents optional L<DateTime> object in the format used in the log. If no
+argument is provided, the timestamp of the line itself is returned.
+
+=head2 text
+
+Accessor to text attribute of line, if any. Should only be defined for well formed
+log lines. Is lvalue.
+
+=head2 tags
+
+Accessor to array reference containing tags, if any. Is lvalue.
+
+=head2 comment
+
+Accessor to comment value, if any. Should only be defined for comment lines. Is lvalue.
+
+=head2 time
+
+Accessor to time value, if any. Should only be defined for event lines. Lvalue.
+
+=head2 description
+
+Accessor to reference to description list. Should only be defined for lines describing the
+beginning of an event. Lvalue.
+
+=head2
+
+Whether lines is malformed.
+
+=head2 is_beginning
+
+Whether line describes the beginning of an event.
+
+=head2 is_end
+
+Whether line only defines the end of an event.
+
+=head2 is_event
+
+Whether line defines the beginning or end of an event.
+
+=head2 is_comment
+
+Whether line represents a comment in the log.
+
+=head2 tags_unspecified
+
+Whether object was constructed from a hash of values that contained no C<tags> key.
+
+=head2 is_blank
+
+Whether object represents a blank line in the log.
+
+=head2 comment_out
+
+Convert this into a comment line.
+
+=head2 all_tags
+
+Expects list of tags. Returns whether all tags in list are present in object.
+
+=head2 exists_tag
+
+Expects list of tags. Returns whether any member of list is among tags of object.
 
 =head1 AUTHOR
 
@@ -298,7 +407,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
 

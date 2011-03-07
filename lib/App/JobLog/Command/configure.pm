@@ -1,6 +1,6 @@
 package App::JobLog::Command::configure;
 BEGIN {
-  $App::JobLog::Command::configure::VERSION = '1.002';
+  $App::JobLog::Command::configure::VERSION = '1.003';
 }
 
 # ABSTRACT: examine or modify App::JobLog configuration
@@ -251,12 +251,139 @@ App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job configure --help
+ job <command>
+ 
+ job configure [-l] [long options...]
+ 	--precision               decimal places of precision in display of
+ 	                          time; e.g., --precision=1; default is 2
+ 	--start-pay-period        the first day of some pay period; pay
+ 	                          period boundaries will be calculated based
+ 	                          on this date and the pay period length;
+ 	                          e.g., --start-pay-period="June 14, 1912"
+ 	--sunday-begins-week      whether Sundays should be regarded as the
+ 	                          first day in the week; the alternative is
+ 	                          Monday; default is TRUE
+ 	--length-pay-period       the length of the pay period in days; e.g.,
+ 	                          --pp-length= 7; default is 14
+ 	--day-length              length of workday; e.g., -d 7.5; default is
+ 	                          8
+ 	--workdays                which days of the week you work represented
+ 	                          as some subset of SMTWHFA; e.g.,
+ 	                          --workdays=MTWH; default is MTWHF
+ 	--merge                   amount of merging of events in summaries;
+ 	                          available options are : 'adjacent same
+ 	                          tags', 'adjacent', 'all', 'none', 'same day
+ 	                          same tags', 'same day', 'same tags';
+ 	                          default is 'adjacent same tags'
+ 	--hidden-columns          columns not to display with the summary
+ 	                          command; available options are: 'none',
+ 	                          'date', 'description', 'duration', 'tags',
+ 	                          'time'; default is 'none'; multiple columns
+ 	                          may be specified
+ 	--editor                  text editor to use when manually editing
+ 	                          the log
+ 	-l --list                 list all configuration parameters
+ 	--help                    this usage screen
+ houghton@NorthernSpy:~$ job configure --list
+ day length                          8
+ editor                   /usr/bin/vim
+ hidden columns                   none
+ merge              adjacent same tags
+ pay period length                  14
+ precision                           1
+ start pay period           2009-01-11
+ sunday begins week               true
+ workdays                        MTWHF
+ houghton@NorthernSpy:~$ job configure --precision 2
+ precision set to 2
+ houghton@NorthernSpy:~$ job configure -l
+ day length                          8
+ editor                   /usr/bin/vim
+ hidden columns                   none
+ merge              adjacent same tags
+ pay period length                  14
+ precision                           2
+ start pay period           2009-01-11
+ sunday begins week               true
+ workdays                        MTWHF
 
 =head1 DESCRIPTION
 
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
+B<App::JobLog::Command::configure> is the command one should use to edit F<~/.joblog/config.ini>. It will
+validate the parameters, preventing you from producing a broken configuration file. If you specify
+no configuration parameters sensible defaults will be used when possible. For some, such as the beginning
+of the pay period, no such default is available. L<App::JobLog::TimeGrammar> will be unable to interpret
+time expressions involving pay periods until this parameter is set. The other parameter for which there
+is no default is editor. See L<App::JobLog::Command::editor> for further details.
+
+=head1 PARAMETERS
+
+=over 8
+
+=item day length
+
+To calculate vacation time and how much time you have left to work in a day L<App::JobLog> needs to
+know how much time you work in a typical workday. This is the day length parameter.
+
+=item editor
+
+L<App::JobLog::Command::editor> requires some text editor to edit the log. Specify it here.
+
+Note that this editor must be invokable like so:
+
+  <editor> <file>
+
+Also, if you need to provide any additional arguments you can provide them as part of this parameter.
+
+=item hidden columns
+
+When you invoke L<App::JobLog::Command::summary> or the other log summarizing commands you have the option
+of hiding various pieces of information which by default are displayed: time, date, duration, tags, description,
+and total hours. If you wish certain of these always to be hidden you can specify this with this parameter. If
+you wish to hide multiple columns you must provide multiple instances of this parameter, each with a column to
+hide.
+
+=item merge
+
+L<App::JobLog::Command::summary> can produce a report keeping each event separate, merging them by day, merging
+them by tag, merging immediately adjoining events, and so forth. If you find you are always specifying a particular
+variety of merge you can set this parameter so it becomes the default.
+
+=item pay period length
+
+In order to calculate the beginning of pay periods one needs to know when a particular period began and the
+length of pay periods generally. The parameter supplies the latter.
+
+=item precision
+
+This parameter specifies the number of digits appearing after the decimal point in the reported duration of events.
+
+=item start pay period
+
+In order to calculate the beginnings and ends of pay periods, and hence how many hours one has left to work
+in a particular pay period, for instance, one needs to know both their length generally and the beginning
+of some particular pay period. This parameter supplies the latter.
+
+=item sunday begins week
+
+L<App::JobLog> uses L<DateTime> for all calendar math. L<DateTime> regards Monday as the first day of the week.
+Another convention is to regard Sunday as the first day of the week. This is significant because it changes the
+meaning of phrases such as I<this week> and I<March 1 until the end of the week>. Use this parameter to choose
+your preferred interpretation of such phrases.
+
+=item workdays
+
+L<App::JobLog> needs to know which days you are expected to work in order to determine when to assign vacation
+hours and calculate how much time you still have to work in a particular period. The default assumption is that
+you work from Monday to Friday, signified by the string I<MTWHF> (case is ignored). Sunday is I<S> and Saturday
+is I<A>. Use this parameter to modify or affirm this assumption.
+
+=back
 
 =head1 AUTHOR
 

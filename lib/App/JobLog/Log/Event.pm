@@ -1,13 +1,15 @@
 package App::JobLog::Log::Event;
 BEGIN {
-  $App::JobLog::Log::Event::VERSION = '1.002';
+  $App::JobLog::Log::Event::VERSION = '1.003';
 }
 
 # ABSTRACT: basically adds an end time to App::JobLog::Log::Line events
 
+
 use Modern::Perl;
 use Class::Autouse qw{DateTime};
 use autouse 'App::JobLog::Time' => qw(now);
+use autouse 'Carp'              => qw(carp);
 
 # for debugging
 use overload '""' => sub {
@@ -32,7 +34,7 @@ sub clone {
     return $clone;
 }
 
-# the portion of an event falling within given interval
+
 sub overlap {
     my ( $self, $start, $end ) = @_;
 
@@ -51,35 +53,47 @@ sub overlap {
     return $clone;
 }
 
+
 sub data {
     $_[0]->{log};
 }
+
 
 sub start : lvalue {
     $_[0]->data->time;
 }
 
+
 sub end : lvalue {
     $_[0]->{end};
 }
 
+
 sub tags : lvalue {
     $_[0]->data->{tags};
 }
+
 
 sub exists_tag {
     my ( $self, @tags ) = @_;
     $self->data->exists_tag(@tags);
 }
 
+
 sub all_tags {
     my ( $self, @tags ) = @_;
     $self->data->all_tags(@tags);
 }
 
-# for sorting
+
 sub cmp {
     my ( $self, $other ) = @_;
+    carp 'argument must also be event' unless $other->isa(__PACKAGE__);
+
+    # defer to subclass sort order if other is a subclass and self isn't
+    return -$other->cmp($self)
+      if ref $self eq __PACKAGE__ && ref $other ne __PACKAGE__;
+
     my $comparison = DateTime->compare( $self->start, $other->start );
     unless ($comparison) {
         if ( $self->is_closed ) {
@@ -164,8 +178,7 @@ sub intersects {
 
 1;
 
-
-
+__END__
 =pod
 
 =head1 NAME
@@ -174,12 +187,14 @@ App::JobLog::Log::Event - basically adds an end time to App::JobLog::Log::Line e
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
+B<App::JobLog::Log::Event> represents an interval in time from the log, providing accessors
+to all the information about this event. It is similar to L<App::JobLog::Log::Line>, delegating
+to an instance of the latter for much functionality, but it contains additional methods to
+handle the properties of intervals of time as distinct from points.
 
 =head1 METHODS
 
@@ -191,6 +206,41 @@ instance or class.
 =head2 clone
 
 Create a duplicate of this event.
+
+=head2 overlap
+
+Expects two L<DateTime> objects as arguments. Returns the portion of this event
+overlapping the interval so defined.
+
+=head2 data
+
+Returns L<App::JobLog::Log::Line> object on which this event is based.
+
+=head2 start
+
+Start of event. Is lvalue method.
+
+=head2 end
+
+End of event. Is lvalue method.
+
+=head2 tags
+
+Tags of event (array reference). Is lvalue method.
+
+=head2 exists_tag
+
+Expects a list of tags. Returns true if event contains any of them.
+
+=head2 all_tags
+
+Expects a list of tags. Returns whether event contains all of them.
+
+=head2 cmp
+
+Used to sort events. E.g.,
+
+ my @sorted_events = sort { $a->cmp($b) } @unsorted;
 
 =head2 is_closed
 
@@ -224,7 +274,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
 

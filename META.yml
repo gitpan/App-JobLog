@@ -25,6 +25,7 @@ requires:
   App::Cmd::Setup: 0
   Carp: 0
   Class::Autouse: 0
+  Config::Tiny: 0
   DateTime: 0
   DateTime::TimeZone: 0
   Exporter: 0
@@ -36,4 +37,4 @@ requires:
   autouse: 0
   constant: 0
   overload: 0
-version: 1.002
+version: 1.003

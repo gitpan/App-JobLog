@@ -1,6 +1,6 @@
 package App::JobLog::Command;
 BEGIN {
-  $App::JobLog::Command::VERSION = '1.002';
+  $App::JobLog::Command::VERSION = '1.003';
 }
 
 # ABSTRACT: common functionality of App::JobLog commands
@@ -12,11 +12,6 @@ use App::JobLog::Config qw(columns);
 sub opt_spec {
     my ( $class, $app ) = @_;
 
-    # my @overview = $class->overview;
-    # push @overview, [] if @overview;
-    # my @options = $class->options($app);
-    # push @overview, @options, [] if @options;
-    # return ( @overview, [ 'help' => "this usage screen" ] );
     return ( $class->options($app), [ 'help' => "this usage screen" ] );
 }
 
@@ -69,7 +64,8 @@ sub validate { }
 
 1;
 
-__END__
+
+
 =pod
 
 =head1 NAME
@@ -78,7 +74,13 @@ App::JobLog::Command - common functionality of App::JobLog commands
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 DESCRIPTION
+
+B<App::JobLog::Command> adds a small amount of specialization and functionality to L<App::Cmd> commands. In
+particular it adds a C<--help> option to every command and ensures that they all have some minimal longer
+form description that can be obtained with the C<help> command.
 
 =head1 AUTHOR
 
@@ -92,4 +94,7 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
 

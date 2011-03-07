@@ -1,5 +1,21 @@
 Revision history for App::JobLog
 
+1.003 7 March, 2011
+  * added midnight check to add command
+  * fixed bug where one could close a closed event
+  * fixed floating timezone bug in TimeGrammar
+  * manually added Config::Tiny dependency that was getting missed by AutoPrereq
+  * fixed bug causing dates to display with same tag merge
+  * fixed bug in TimeGrammar concerning purely numeric dates such as '15' and '2011'
+  * fixed failure to pull arguments off stack in App::JobLog::Vacation::Period::cmp()
+  * fixed layout bug in vacation listing that gave too much space to vacation index
+  * fixed overlap logic for repeating vacations
+  * fixed flex vacation duration calculation ation ation ation ...
+  * fixed vacation/event sorting
+  * improved logic of find_previous_event in Log
+  * fixed closing time insertion bug
+  * improved output of log validation
+
 1.002 4 March, 2011
   * added normalization of whitespace in log
   * added options to summary and configuration to allow the hiding of various fields

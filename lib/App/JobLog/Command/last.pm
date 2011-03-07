@@ -1,6 +1,6 @@
 package App::JobLog::Command::last;
 BEGIN {
-  $App::JobLog::Command::last::VERSION = '1.002';
+  $App::JobLog::Command::last::VERSION = '1.003';
 }
 
 # ABSTRACT: show details of last recorded event
@@ -33,7 +33,8 @@ sub abstract { 'describe the last task recorded' }
 
 1;
 
-__END__
+
+
 =pod
 
 =head1 NAME
@@ -42,7 +43,27 @@ App::JobLog::Command::last - show details of last recorded event
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job last
+ Sunday,  6 March, 2011
+   7:36 - 7:37 pm  0.01  widget  something to add                                                                                                                  
+ 
+   TOTAL HOURS 0.01
+   widget      0.01
+
+=head1 DESCRIPTION
+
+B<App::JobLog::Command::last> simply tells you the last event in the log. This is useful if you
+want to know whether you ever punched out, for example, or if you want to know what tags a new
+event will inherit, what task you would be resuming, and so forth.
+
+=head1 SEE ALSO
+
+L<App::JobLog::Command::summary>, L<App::JobLog::Command::today>, L<App::JobLog::Command::resume>,
+L<App::JobLog::Command::modify>
 
 =head1 AUTHOR
 
@@ -56,4 +77,7 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
 

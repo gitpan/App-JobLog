@@ -1,6 +1,6 @@
 package App::JobLog::Command::modify;
 BEGIN {
-  $App::JobLog::Command::modify::VERSION = '1.002';
+  $App::JobLog::Command::modify::VERSION = '1.003';
 }
 
 # ABSTRACT: modify last logged event
@@ -75,7 +75,8 @@ sub validate {
 
 1;
 
-__END__
+
+
 =pod
 
 =head1 NAME
@@ -84,7 +85,45 @@ App::JobLog::Command::modify - modify last logged event
 
 =head1 VERSION
 
-version 1.002
+version 1.003
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job last
+ Sunday,  6 March, 2011
+   7:36 - 7:37 pm  0.01  widget  something to add                                                                                                                  
+ 
+   TOTAL HOURS 0.01
+   widget      0.01
+ houghton@NorthernSpy:~$ job modify --help
+ job <command>
+ 
+ job modify [-acrtu] [long options...] [<description>]
+ 	-a --add-description       add some descriptive text
+ 	-r --replace-description   replace current description
+ 	-t --tag                   add tag; e.g., -t foo -t bar
+ 	-u --untag                 remove tag; e.g., -u foo -u bar
+ 	-c --clear-tags            remove all tags
+ 	--help                     this usage screen
+ houghton@NorthernSpy:~$ job m -a "and still more" -c -t foo -t bar
+ houghton@NorthernSpy:~$ job l
+ Sunday,  6 March, 2011
+   7:36 - 7:37 pm  0.01  bar, foo  something to add; and still more                                                                                                  
+ 
+   TOTAL HOURS 0.01
+   bar         0.01
+   foo         0.01
+
+=head1 DESCRIPTION
+
+B<App::JobLog::Command::modify> lets you change anything about the most recent task in the log
+other than its timestamp. Often this is all you need to do to fix a mistake and it is a little
+easier than editing the log itself.
+
+=head1 SEE ALSO
+
+L<App::JobLog::Command::last>, L<App::JobLog::Command::resume>, L<App::JobLog::Command::today>,
+L<App::JobLog::Command::edit>, L<App::JobLog::Command::done>
 
 =head1 AUTHOR
 
@@ -98,4 +137,7 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+
+__END__
 

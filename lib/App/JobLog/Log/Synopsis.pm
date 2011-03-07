@@ -1,9 +1,10 @@
 package App::JobLog::Log::Synopsis;
 BEGIN {
-  $App::JobLog::Log::Synopsis::VERSION = '1.002';
+  $App::JobLog::Log::Synopsis::VERSION = '1.003';
 }
 
 # ABSTRACT: consolidates App::JobClock::Log::Event objects for display
+
 
 use Exporter 'import';
 our @EXPORT_OK = qw(
@@ -42,6 +43,7 @@ use constant MERGE_SAME_TAGS          => 4;
 use constant MERGE_SAME_DAY           => 5;
 use constant MERGE_SAME_DAY_SAME_TAGS => 6;
 use constant MERGE_NONE               => 0;
+
 
 # takes in a bunch of App::JobClock::Log::Event objects
 # returns a bunch of App::JobClock::Log::Synopsis objects
@@ -181,6 +183,7 @@ sub tag_string {
 
 sub events { @{ $_[0]->{events} } }
 
+
 sub last_event { ( $_[0]->events )[-1] }
 
 # constructs a single-event synopsis
@@ -258,8 +261,7 @@ sub time_fmt {
 
 1;
 
-
-
+__END__
 =pod
 
 =head1 NAME
@@ -268,14 +270,21 @@ App::JobLog::Log::Synopsis - consolidates App::JobClock::Log::Event objects for 
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
+B<App::JobLog::Log::Synopsis> represents a collection of L<App::JobLog::Log::Event> objects merged
+together according to some merging rule.
 
 =head1 METHODS
+
+=head2 collect
+
+Only exported function of B<App::JobLog::Log::Synopsis>, C<collect> exects a reference
+to a L<App::JobLog::Log::Day> and a merge level. It then generates all the synopses
+appropriate to the given level in the given day, storing these in the day under the
+key C<synopses>.
 
 =head2 date
 
@@ -300,7 +309,11 @@ and separating distinct tags with commas.
 
 =head2 events
 
-Accessor for events in Synopsis.
+Accessor for events in Synopsis. Returns these as list rather than reference.
+
+=head2 last_event
+
+Accessor for last event in synopsis.
 
 =head2 single_interval
 
@@ -330,7 +343,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
 

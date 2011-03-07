@@ -1,6 +1,6 @@
 package App::JobLog::Vacation::Period;
 BEGIN {
-  $App::JobLog::Vacation::Period::VERSION = '1.002';
+  $App::JobLog::Vacation::Period::VERSION = '1.003';
 }
 
 # ABSTRACT: extension of L<App::JobLog::Log::Event> to handle special properties of vacation periods
@@ -74,7 +74,7 @@ sub clone {
 
 
 sub cmp {
-    my ( $self, $other );
+    my ( $self, $other ) = @_;
 
     # when mixed with ordinary events
     if ( ref $other eq 'App::JobLog::Log::Event' ) {
@@ -113,7 +113,7 @@ my $re = qr{
     )
 }xi;
 
-# for parsing a line in an existing log
+
 sub parse {
     my ( $class, $text ) = @_;
     $class = ref $class || $class;
@@ -294,6 +294,32 @@ sub _properties {
     return $s;
 }
 
+
+sub overlap {
+    my ( $self, $start, $end ) = @_;
+    if ( $self->annual || $self->monthly ) {
+
+        # cloning here should be duplicated work, but better safe than sorry
+        my $cloned = 0;
+        if (   $self->annual
+            || $self->monthly && $self->start->year != $start->year )
+        {
+            $self   = $self->clone;
+            $cloned = 1;
+            my $delta = $start->year - $self->start->year;
+            $self->start->add( years => $delta );
+            $self->end->add( years => $delta );
+        }
+        if ( $self->monthly && $self->start->month != $start->month ) {
+            $self = $self->clone unless $cloned;
+            my $delta = $start->month - $self->start->month;
+            $self->start->add( months => $delta );
+            $self->end->add( months => $delta );
+        }
+    }
+    return $self->SUPER::overlap( $start, $end );
+}
+
 # tag part of summary
 sub _tags {
     my ($self) = @_;
@@ -317,7 +343,7 @@ App::JobLog::Vacation::Period - extension of L<App::JobLog::Log::Event> to handl
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 
@@ -365,6 +391,10 @@ properties.
 Overrides L<App::JobLog::Log::Event>'s C<cmp> method so that repeating vacations sort
 above non-repeating ones.
 
+=head2 parse
+
+Class method parsing line in F<vacation> into a vacation object.
+
 =head2 to_string
 
 Serializes period into something printable in the vacation file.
@@ -380,6 +410,11 @@ Converts period into list of displayable parts: time, properties, tags, descript
 =head2 single_day
 
 Whether this period concerns a single day or a longer span of time.
+
+=head2 overlap
+
+Adjust start and end times for annual or monthly periods then delegates to
+superclass method in L<App::JobLog::Log::Event>.
 
 =head1 AUTHOR
 

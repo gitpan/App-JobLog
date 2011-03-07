@@ -33,6 +33,7 @@ my %WriteMakefileArgs = (
     'App::Cmd::Setup' => '0',
     'Carp' => '0',
     'Class::Autouse' => '0',
+    'Config::Tiny' => '0',
     'DateTime' => '0',
     'DateTime::TimeZone' => '0',
     'Exporter' => '0',
@@ -45,7 +46,7 @@ my %WriteMakefileArgs = (
     'constant' => '0',
     'overload' => '0'
   },
-  'VERSION' => '1.002',
+  'VERSION' => '1.003',
   'test' => {
     'TESTS' => 't/*.t'
   }

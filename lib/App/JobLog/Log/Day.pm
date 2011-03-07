@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 BEGIN {
-  $App::JobLog::Log::Day::VERSION = '1.002';
+  $App::JobLog::Log::Day::VERSION = '1.003';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -39,8 +39,8 @@ sub skip_flex { $_[0]->{skip_flex} }
 sub time_remaining {
     my ($self) = @_;
     my $t = 0;
-    $t += $_->duration for @{ $self->events }, @{ $self->vacation };
-    $t -= day_length if is_workday $self->start;
+    $t -= $_->duration for @{ $self->events }, @{ $self->vacation };
+    $t += WORK_SECONDS if is_workday $self->start;
     return $t;
 }
 
@@ -73,7 +73,7 @@ sub times {
         $times->{tags}{$_} += $d for @tags;
         $times->{untagged} += $d unless @tags;
         $times->{total} += $d;
-        $times->{vacation} += $d if ref $e eq 'App::JobLog::Vacation::Period';
+        $times->{vacation} += $d if $e->isa('App::JobLog::Vacation::Period');
     }
     $times->{expected} += WORK_SECONDS
       if is_workday $self->start;
@@ -170,7 +170,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 DESCRIPTION
 
@@ -213,6 +213,11 @@ Whether period contains neither events nor vacation .
 Count up the amount of time spent in various ways this day.
 
 =head2 display
+
+C<display> expects a previous day object, or C<undef> if there is no such object,
+a format specifying column widths, and a hash reference containing various
+pieces of formatting information. It prints a report of the events of the day
+to STDOUT.
 
 =head2 pseudo_event
 

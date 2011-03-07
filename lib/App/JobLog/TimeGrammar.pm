@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 BEGIN {
-  $App::JobLog::TimeGrammar::VERSION = '1.002';
+  $App::JobLog::TimeGrammar::VERSION = '1.003';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -25,7 +25,11 @@ use autouse 'App::JobLog::Config' => qw(
   start_pay_period
   DIRECTORY
 );
-use autouse 'App::JobLog::Time' => qw(now today);
+use autouse 'App::JobLog::Time' => qw(
+  now
+  today
+  tz
+);
 
 # some variables we need visible inside the date parsing regex
 # %matches holds a complete parsing
@@ -456,8 +460,8 @@ sub adjust_weekday {
 sub time_unit {
     my $h = shift;
     if ( $h->{type} eq 'numeric' ) {
-        return 'years' if exists $h->{month};
-        return 'months';
+        return 'years' => 1 if exists $h->{month};
+        return 'months' => 1;
     }
     else {
         if ( my $period = $h->{period} ) {
@@ -551,7 +555,7 @@ sub decontextualized_numeric_date {
     $h->{year}  //= $date->year;
     $h->{month} //= $date->month;
     my $day_unspecified = !exists $h->{day};
-    $date = DateTime->new( %$h, day => $h->{day} // 1 );
+    $date = DateTime->new( time_zone => tz(), %$h, day => $h->{day} // 1 );
 
     if ( !( exists $h->{day} || $is_start ) ) {
         $date->add( months => 1 );
@@ -567,7 +571,7 @@ sub fix_date {
             init_month_abbr();
             $d->{month} = $month_abbr{ $d->{month} };
             delete $d->{type};
-            return DateTime->new(%$d);
+            return DateTime->new( time_zone => tz(), %$d );
         }
         elsif ( my $day = $d->{day} ) {
             my $date = today;
@@ -711,7 +715,7 @@ sub fix_date {
 
     # numeric date
     delete $d->{type};
-    return DateTime->new(%$d);
+    return DateTime->new( time_zone => tz(), %$d );
 }
 
 # lazy initialization of verbal -> numeric month map
@@ -816,7 +820,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.002
+version 1.003
 
 =head1 SYNOPSIS
 
@@ -930,6 +934,17 @@ to facilitate finding them.
                     <year> = d{4}
 
 In general C<App::JobLog::TimeGrammar> will understand most time expressions you are likely to want to use.
+
+=head2 FUTURE
+
+B<TimeGrammar> does not generally understand the future. It understants C<this> and C<last> but not C<next>. It
+understands c<today> and C<yesterday> but not C<tomorrow>. This may change (in the future), but most tasks that
+involve the log do not require explicit reference to the future, since all the events in the log are necessarily
+in the past. It would sometimes be useful to say a particular vacation date is C<tomorrow> or C<next month>, however.
+
+If you specify a period part of which is in the future, this will cause no difficulties, and in fact both endpoints
+will be parsed out correctly, but again, because the log only concerns the past the future times will have no effect
+on the output. It is simply easier to say C<this month> than C<the beginning of the month until today>.
 
 =head1 METHODS
 
