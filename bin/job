@@ -3,8 +3,6 @@
 
 # ABSTRACT: log what you do
 
-eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # (improbably) not running under some shell
 use App::JobLog;
 App::JobLog->run;
 
@@ -18,7 +16,7 @@ job - log what you do
 
 =head1 VERSION
 
-version 1.004
+version 1.005
 
 =head1 SYNOPSIS
 

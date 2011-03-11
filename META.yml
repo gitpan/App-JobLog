@@ -37,4 +37,4 @@ requires:
   autouse: 0
   constant: 0
   overload: 0
-version: 1.004
+version: 1.005

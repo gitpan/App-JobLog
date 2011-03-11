@@ -1,5 +1,9 @@
 Revision history for App::JobLog
 
+1.005     2011-03-11 12:21:17 America/New_York
+  * added check for unclosed tasks to summary command
+  * removed eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}' from bin/job -- this was getting automatically inserted anyway
+
 1.004     2011-03-11 11:41:40 America/New_York
   * fixed column count detection bug
   * added --columns and --no-wrap options

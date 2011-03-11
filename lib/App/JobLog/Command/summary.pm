@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.004';
+  $App::JobLog::Command::summary::VERSION = '1.005';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -33,6 +33,7 @@ use autouse 'App::JobLog::Log::Synopsis' => qw(
   MERGE_SAME_DAY_SAME_TAGS
   MERGE_NONE
 );
+use autouse 'App::JobLog::Time' => qw(today);
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -142,6 +143,26 @@ sub execute {
         }
         else {
             display $days, $merge_level, $hidden, $screen_width;
+        }
+
+        # check for long task
+        my ($last_e) = App::JobLog::Log->new->last_event;
+        if ( $last_e->is_open ) {
+            my ( $then, $today ) = ( $last_e->start, today );
+            if (
+                !(
+                       $then->year == $today->year
+                    && $then->month == $today->month
+                    && $then->day == $today->day
+                )
+              )
+            {
+                print <<END;
+
+WARNING! The last event in the log has been open since before 12:00 am today!
+
+END
+            }
         }
     }
     my $t = 0;
@@ -267,7 +288,9 @@ sub _parse_time {
 
 sub usage_desc { '%c ' . __PACKAGE__->name . ' %o <date or date range>' }
 
-sub abstract { 'list tasks with certain properties in a particular time range' }
+sub abstract {
+    'list tasks with certain properties in a particular time range';
+}
 
 sub full_description {
     <<END
@@ -406,7 +429,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.004
+version 1.005
 
 =head1 SYNOPSIS
 

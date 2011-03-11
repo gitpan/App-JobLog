@@ -1,6 +1,6 @@
 package App::JobLog::Command::modify;
 BEGIN {
-  $App::JobLog::Command::modify::VERSION = '1.004';
+  $App::JobLog::Command::modify::VERSION = '1.005';
 }
 
 # ABSTRACT: modify last logged event
@@ -85,7 +85,7 @@ App::JobLog::Command::modify - modify last logged event
 
 =head1 VERSION
 
-version 1.004
+version 1.005
 
 =head1 SYNOPSIS
 
