@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 BEGIN {
-  $App::JobLog::Log::Day::VERSION = '1.003';
+  $App::JobLog::Log::Day::VERSION = '1.004';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -81,7 +81,7 @@ sub times {
 
 
 sub display {
-    my ( $self, $previous, $format, $columns ) = @_;
+    my ( $self, $previous, $format, $columns, $screen_width ) = @_;
     return if $self->is_empty;
 
     # cache some bits from the $columns hash
@@ -106,7 +106,9 @@ sub display {
         push @lines, [ $s->time_fmt ] if $show_times;
         push @lines, [ duration( $s->duration ) ] if $show_durations;
         push @lines, wrap( $s->tag_string, $tag_width ) if $show_tags;
-        push @lines, wrap( $s->description, $description_width )
+        push @lines, $screen_width == -1
+          ? [ $s->description ]
+          : wrap( $s->description, $description_width )
           if $show_descriptions;
         my $count = _pad_lines( \@lines );
 
@@ -170,7 +172,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.003
+version 1.004
 
 =head1 DESCRIPTION
 
@@ -215,8 +217,10 @@ Count up the amount of time spent in various ways this day.
 =head2 display
 
 C<display> expects a previous day object, or C<undef> if there is no such object,
-a format specifying column widths, and a hash reference containing various
-pieces of formatting information. It prints a report of the events of the day
+a format specifying column widths, a hash reference containing various
+pieces of formatting information, and the screen width -- -1 means do not wrap.
+
+It prints a report of the events of the day
 to STDOUT.
 
 =head2 pseudo_event

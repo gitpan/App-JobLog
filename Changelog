@@ -1,5 +1,9 @@
 Revision history for App::JobLog
 
+1.004     2011-03-11 11:41:40 America/New_York
+  * fixed column count detection bug
+  * added --columns and --no-wrap options
+
 1.003 7 March, 2011
   * added midnight check to add command
   * fixed bug where one could close a closed event

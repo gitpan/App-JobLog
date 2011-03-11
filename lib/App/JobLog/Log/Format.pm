@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 BEGIN {
-  $App::JobLog::Log::Format::VERSION = '1.003';
+  $App::JobLog::Log::Format::VERSION = '1.004';
 }
 
 # ABSTRACT: pretty printer for log
@@ -17,7 +17,6 @@ our @EXPORT_OK = qw(
 
 use Modern::Perl;
 use App::JobLog::Config qw(
-  columns
   day_length
   is_workday
   precision
@@ -27,8 +26,11 @@ use Text::WrapI18N qw();
 use App::JobLog::TimeGrammar qw(parse);
 
 use constant TAG_COLUMN_LIMIT => 10;
-use constant MARGIN           => 30;
-use constant DURATION_FORMAT  => '%0.' . precision . 'f';
+use constant MARGIN           => 5;
+
+# minimum width of description column
+use constant MIN_WIDTH       => 20;
+use constant DURATION_FORMAT => '%0.' . precision . 'f';
 
 
 sub summary {
@@ -119,7 +121,7 @@ sub summary {
         if ($flex) {
             delete $d->{deferred};
             my $tr = $d->time_remaining;
-            if ($tr > 0) {
+            if ( $tr > 0 ) {
                 $flex->end = $flex->start->clone->add( seconds => $tr );
                 push @events, $flex;
             }
@@ -169,7 +171,7 @@ sub _days {
 
 
 sub display {
-    my ( $days, $merge_level, $hidden ) = @_;
+    my ( $days, $merge_level, $hidden, $screen_width ) = @_;
 
     # TODO augment events with vacation and holidays
     if (@$days) {
@@ -184,7 +186,7 @@ sub display {
             description => !$hidden->{description},
             duration    => !$hidden->{duration},
         };
-        my $format = _define_format( \@synopses, $columns );
+        my $format = _define_format( \@synopses, $columns, $screen_width );
 
         # keep track of various durations
         my $times = {
@@ -199,7 +201,7 @@ sub display {
         my $previous;
         for my $d (@$days) {
             $d->times($times);
-            $d->display( $previous, $format, $columns );
+            $d->display( $previous, $format, $columns, $screen_width );
             $previous = $d;
         }
 
@@ -235,7 +237,7 @@ sub display {
 # generate printf format for synopses
 # returns format and wrap widths for tags and descriptions
 sub _define_format {
-    my ( $synopses, $hash ) = @_;
+    my ( $synopses, $hash, $screen_width ) = @_;
 
     #determine maximum width of each column
     my $widths;
@@ -243,7 +245,7 @@ sub _define_format {
         if ( $hash->{tags} ) {
             my $w1 = $hash->{widths}{tags} || 0;
             my $ts = $s->tag_string;
-            if ( length $ts > TAG_COLUMN_LIMIT ) {
+            if ( $screen_width > -1 && length $ts > TAG_COLUMN_LIMIT ) {
                 my $wrapped = wrap( $ts, TAG_COLUMN_LIMIT );
                 $ts = '';
                 for my $line (@$wrapped) {
@@ -281,15 +283,20 @@ sub _define_format {
         $hash->{formats}{duration} = sprintf '%%%ds', $hash->{widths}{duration};
     }
     if ( $hash->{description} ) {
+        if ($screen_width == -1) {
+            $hash->{formats}{description} = '%s';
+        } else {
         $margins++;
-        my $max_description = columns;
+        my $max_description = $screen_width;
         for my $col (qw(time duration tags)) {
-            $max_description -= $hash->{widths}{col} || 0;
+            $max_description -= $hash->{widths}{$col} || 0;
         }
         $max_description -= $margins * 2;    # left margins
         $max_description -= MARGIN;          # margin on the right
+        $max_description = MIN_WIDTH if $max_description < MIN_WIDTH;
         $hash->{widths}{description} = $max_description;
         $hash->{formats}{description} = sprintf '%%-%ds', $max_description;
+    }
     }
 
     my $format = '';
@@ -330,7 +337,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.003
+version 1.004
 
 =head1 DESCRIPTION
 

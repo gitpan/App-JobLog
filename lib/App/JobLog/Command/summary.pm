@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.003';
+  $App::JobLog::Command::summary::VERSION = '1.004';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -15,6 +15,7 @@ use autouse 'App::JobLog::TimeGrammar'  => qw(parse daytime);
 use autouse 'Carp'                      => qw(carp);
 use autouse 'Getopt::Long::Descriptive' => qw(prog_name);
 use autouse 'App::JobLog::Config'       => qw(
+  columns
   is_hidden
   merge
 );
@@ -111,6 +112,20 @@ sub execute {
     eval { $days = summary join( ' ', @$args ), $test, $hidden };
     $self->usage_error($@) if $@;
     unless ( $opt->{hidden} ) {
+
+        # figure out how wide to make things
+        my $screen_width;
+        if ( $opt->wrap ) {
+            if ( $opt->no_wrap ) {
+                $screen_width = -1;
+            }
+            else {
+                $screen_width = $opt->columns;
+            }
+        }
+        else {
+            $screen_width = columns;
+        }
         if ($dateless) {
 
             # create "day" containing all events
@@ -123,10 +138,10 @@ sub execute {
                 push @{ $duck_day->events },   @{ $d->events };
                 push @{ $duck_day->vacation }, @{ $d->vacation };
             }
-            display [$duck_day], $merge_level, $hidden;
+            display [$duck_day], $merge_level, $hidden, $screen_width;
         }
         else {
-            display $days, $merge_level, $hidden;
+            display $days, $merge_level, $hidden, $screen_width;
         }
     }
     my $t = 0;
@@ -355,6 +370,18 @@ sub options {
             'no-totals',
             'do not display the footer containing total hours worked, etc.'
         ],
+        [
+            'wrap' => 'hidden' => {
+                one_of => [
+                    [
+                        'columns|c=i',
+'limit the width of the report to the specified number of columns; '
+                          . ' by default the width of the terminal is automatically detected and, if that fails, a width of 76 is used'
+                    ],
+                    [ 'no-wrap|W', 'do not wrap the text to fit columns' ],
+                ]
+            }
+        ],
         [ 'hidden', 'display nothing', { hidden => 1 } ],
     );
 }
@@ -363,6 +390,8 @@ sub validate {
     my ( $self, $opt, $args ) = @_;
 
     $self->usage_error('no time expression provided') unless @$args;
+    $self->usage_error('columns must be positive')
+      if defined $opt->{columns} && $opt->columns < 1;
 }
 
 1;
@@ -377,7 +406,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.003
+version 1.004
 
 =head1 SYNOPSIS
 
