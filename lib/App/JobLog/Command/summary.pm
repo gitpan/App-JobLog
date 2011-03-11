@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.005';
+  $App::JobLog::Command::summary::VERSION = '1.006';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -116,7 +116,7 @@ sub execute {
 
         # figure out how wide to make things
         my $screen_width;
-        if ( $opt->wrap ) {
+        if ( $opt->{wrap} ) {
             if ( $opt->no_wrap ) {
                 $screen_width = -1;
             }
@@ -429,7 +429,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.005
+version 1.006
 
 =head1 SYNOPSIS
 

@@ -1,5 +1,8 @@
 Revision history for App::JobLog
 
+1.006     2011-03-11 16:13:57 America/New_York
+  * fixed problem with hidden wrap option
+
 1.005     2011-03-11 12:21:17 America/New_York
   * added check for unclosed tasks to summary command
   * removed eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}' from bin/job -- this was getting automatically inserted anyway
