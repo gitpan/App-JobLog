@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 BEGIN {
-  $App::JobLog::TimeGrammar::VERSION = '1.006';
+  $App::JobLog::TimeGrammar::VERSION = '1.007';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -97,6 +97,8 @@ my $re = qr{
       (?:
        (?&year)
        |
+       (?&ym)
+       |
        (?&at_time_on) (?&numeric_no_time)
        |
        (?&numeric_no_time) (?&at_time))
@@ -104,6 +106,8 @@ my $re = qr{
      )
      
      (?<year> (?{ %buffer = () }) (\d{4}) (?{ $buffer{year} = $^N }) ) 
+     
+     (?<ym> (?&year) (?&divider) (\d{1,2}) (?{ @buffer{qw(month unit)} = ($^N, 'months') }) )
 
      (?<numeric_no_time> (?{ %buffer = () }) (?&us) | (?&iso) | (?&md) | (?&dom) )
 
@@ -149,7 +153,7 @@ my $re = qr{
      )
 
      (?<verbal>
-      (?: (?&named_period) | (?&relative_period) | (?&month_day) | (?&full) ) 
+      (?: (?&my) | (?&named_period) | (?&relative_period) | (?&month_day) | (?&full) ) 
       (?{ $buffer{type} = 'verbal' })
      )
 
@@ -212,6 +216,8 @@ my $re = qr{
        $buffer{day}   = $^N;
       })
      )
+     
+     (?<my> ((?&month)) ,? \s*+ (?&year) (?{ @buffer{qw(month unit)} = ($^N, 'months') }) )
 
      (?<day_first>
       (\d{1,2}) (?{ $b1 = $^N })
@@ -341,54 +347,63 @@ sub parse {
             }
         }
 
-        my $h1 = $matches{$d1};
-        my %t1 = extract_time( $h1, 1 );
+        my $h1   = $matches{$d1};
+        my $unit = delete $h1->{unit};
         normalize($h1);
-        my ( $h2, $count, %t2 );
-        if ( $d2 && $matches{$d2} ) {
-            $h2 = $matches{$d2};
-            normalize($h2);
-            %t2    = extract_time($h2);
-            $count = 2;
+        if ($unit) {
+            # $h1 is necessarily fixed and there is no time associated
+    $h1 = fix_date( $h1, 1 );
+    my $h2 = $h1->clone->add($unit => 1)->subtract(seconds=>1);
+    return $h1, $h2, 1;
         }
         else {
-            $h2    = {%$h1};
-            %t2    = ( hour => 23, minute => 59, second => 59 );
-            $count = 1;
-        }
-        infer_modifier( $h1, $h2 );
-        my ( $s1, $s2 ) = ( $t1{suffix}, $t2{suffix} );
-        delete $t1{suffix}, delete $t2{suffix};
-        if ( is_fixed($h1) ) {
-            ( $h1, $h2 ) = fixed_start( $h1, $h2 );
-        }
-        elsif ( is_fixed($h2) ) {
-            ( $h1, $h2 ) = fixed_end( $h1, $h2 );
-        }
-        else {
-            ( $h1, $h2 ) = before_now( $h1, $h2 );
-        }
-        croak "dates in \"$phrase\" are out of order"
-          unless DateTime->compare( $h1, $h2 ) <= 0;
-        $h1->set(%t1);
-        $h2->set(%t2);
-        if ( $h1 > $h2 ) {
-            if (   $h1->year == $h2->year
-                && $h1->month == $h2->month
-                && $h1->day == $h2->day
-                && $h2->hour < 12
-                && $s2 eq 'x' )
-            {
+            my %t1 = extract_time( $h1, 1 );
+            my ( $h2, $count, %t2 );
+            if ( $d2 && $matches{$d2} ) {
+                $h2 = $matches{$d2};
+                normalize($h2);
+                %t2    = extract_time($h2);
+                $count = 2;
+            }
+            else {
+                $h2    = {%$h1};
+                %t2    = ( hour => 23, minute => 59, second => 59 );
+                $count = 1;
+            }
+            infer_modifier( $h1, $h2 );
+            my ( $s1, $s2 ) = ( $t1{suffix}, $t2{suffix} );
+            delete $t1{suffix}, delete $t2{suffix};
+            if ( is_fixed($h1) ) {
+                ( $h1, $h2 ) = fixed_start( $h1, $h2 );
+            }
+            elsif ( is_fixed($h2) ) {
+                ( $h1, $h2 ) = fixed_end( $h1, $h2 );
+            }
+            else {
+                ( $h1, $h2 ) = before_now( $h1, $h2 );
+            }
+            croak "dates in \"$phrase\" are out of order"
+              unless DateTime->compare( $h1, $h2 ) <= 0;
+            $h1->set(%t1);
+            $h2->set(%t2);
+            if ( $h1 > $h2 ) {
+                if (   $h1->year == $h2->year
+                    && $h1->month == $h2->month
+                    && $h1->day == $h2->day
+                    && $h2->hour < 12
+                    && $s2 eq 'x' )
+                {
 
             # we inferred the 12 hour period of the second endpoint incorrectly;
             # it was in the evening rather than morning
-                $h2->add( hours => 12 );
+                    $h2->add( hours => 12 );
+                }
+                else {
+                    croak "dates in \"$phrase\" are out of order";
+                }
             }
-            else {
-                croak "dates in \"$phrase\" are out of order";
-            }
+            return $h1, $h2, $count == 2;
         }
-        return $h1, $h2, $count == 2;
     }
     croak "cannot parse \"$phrase\" as a date expression";
 }
@@ -820,7 +835,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.006
+version 1.007
 
 =head1 SYNOPSIS
 
@@ -913,9 +928,10 @@ to facilitate finding them.
        <month_day_no_time> = <month_first> | <day_first>
              <month_first> = <month> s d{1,2}
           <month_modifier> = <modifier> | <termini> [ s "of" ]
+                      <my> = <month> [","] s <year>
             <named_period> = <modifiable_day> | <modifiable_month> | <modifiable_period> 
                      <now> = "now"
-                 <numeric> = <year> | <at_time_on> <numeric_no_time> | <numeric_no_time> <at_time>
+                 <numeric> = <year> | <ym> |<at_time_on> <numeric_no_time> | <numeric_no_time> <at_time>
          <numeric_no_time> = <us> | <iso> | <md> | <dom>
                      <pay> = "pay" | "pp" | "pay" s* "period"
                   <period> = "week" | "month" | "year" | <pay>
@@ -929,9 +945,10 @@ to facilitate finding them.
                     <time> = d{1,2} [ : d{2} [ : d{2} ] ] [ s* <time_suffix> ]
              <time_suffix> = ( "a" | "p" ) ( "m" | ".m." )
                       <us> = d{1,2} ( <divider> ) d{1,2} \1 d{4}
-                  <verbal> = <named_period> | <relative_period> | <month_day> | <full>  
+                  <verbal> = <my> | <named_period> | <relative_period> | <month_day> | <full>  
                  <weekday> = <full_weekday> | <short_weekday>
                     <year> = d{4}
+                      <ym> = <year> <divider> d{1,2}
 
 In general C<App::JobLog::TimeGrammar> will understand most time expressions you are likely to want to use.
 

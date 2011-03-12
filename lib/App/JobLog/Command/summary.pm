@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.006';
+  $App::JobLog::Command::summary::VERSION = '1.007';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -429,14 +429,14 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.006
+version 1.007
 
 =head1 SYNOPSIS
 
  houghton@NorthernSpy:~$ job summary --help
  job <command>
  
- job summary [-iMmTtV] [long options...] <date or date range>
+ job summary [-ciMmTtVW] [long options...] <date or date range>
  	Use 'job help summary' to see full details.
  	                                  
  	-t --tag                            filter events to include only
@@ -477,6 +477,14 @@ version 1.006
  	--no-totals                         do not display the footer
  	                                    containing total hours worked,
  	                                    etc.
+ 	-c --columns                        limit the width of the report to
+ 	                                    the specified number of columns; 
+ 	                                    by default the width of the
+ 	                                    terminal is automatically
+ 	                                    detected and, if that fails, a
+ 	                                    width of 76 is used
+ 	-W --no-wrap                        do not wrap the text to fit
+ 	                                    columns
  	--help                              this usage screen
  houghton@NorthernSpy:~$ job s this week
  Sunday,  6 March, 2011
@@ -528,7 +536,6 @@ version 1.006
    foo         1.07
    widgets     2.77
  houghton@NorthernSpy:~$ job s --merge-same-tags Friday through today
- Friday,  4 March, 2011
    2.77  widgets   trying to get Eclipse working properly again; figuring out why some files are really, really slow                                   
    1.07  bar, foo  something to add; and still more                                                                                                    
  

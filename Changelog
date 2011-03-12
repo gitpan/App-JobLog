@@ -1,5 +1,11 @@
 Revision history for App::JobLog
 
+1.007     2011-03-12 12:32:32 America/New_York
+  * added File::ReadBackwards prerequisite to dist.ini
+  * added missing options to documentation for summary
+  * fixed bug in split_days
+  * added Nov, 2009 and 2009/11 type dates to TimeGrammar
+
 1.006     2011-03-11 16:13:57 America/New_York
   * fixed problem with hidden wrap option
 

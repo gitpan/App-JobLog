@@ -1,6 +1,6 @@
 package App::JobLog::Config;
 BEGIN {
-  $App::JobLog::Config::VERSION = '1.006';
+  $App::JobLog::Config::VERSION = '1.007';
 }
 
 # ABSTRACT: central depot for App::JobLog configuration parameters and controller allowing their modification
@@ -319,7 +319,7 @@ App::JobLog::Config - central depot for App::JobLog configuration parameters and
 
 =head1 VERSION
 
-version 1.006
+version 1.007
 
 =head1 DESCRIPTION
 

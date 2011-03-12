@@ -29,6 +29,7 @@ requires:
   DateTime: 0
   DateTime::TimeZone: 0
   Exporter: 0
+  File::ReadBackwards: 0
   FileHandle: 0
   IO::All: 0
   Modern::Perl: 0
@@ -37,4 +38,4 @@ requires:
   autouse: 0
   constant: 0
   overload: 0
-version: 1.006
+version: 1.007

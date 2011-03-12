@@ -1,6 +1,6 @@
 package App::JobLog::Vacation;
 BEGIN {
-  $App::JobLog::Vacation::VERSION = '1.006';
+  $App::JobLog::Vacation::VERSION = '1.007';
 }
 
 # ABSTRACT: controller for the vacation model
@@ -165,7 +165,7 @@ App::JobLog::Vacation - controller for the vacation model
 
 =head1 VERSION
 
-version 1.006
+version 1.007
 
 =head1 DESCRIPTION
 

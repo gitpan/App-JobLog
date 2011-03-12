@@ -1,10 +1,10 @@
 Changelog
 LICENSE
 MANIFEST
+MANIFEST.SKIP
 META.yml
 Makefile.PL
 README
-TODO
 bin/job
 dist.ini
 lib/App/JobLog.pm
@@ -41,3 +41,4 @@ t/data/normal.log
 t/data/small.log
 t/data/tiny.log
 t/make_log.pl
+test_log

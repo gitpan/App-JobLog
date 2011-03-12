@@ -1,6 +1,6 @@
 package App::JobLog::Log::Event;
 BEGIN {
-  $App::JobLog::Log::Event::VERSION = '1.006';
+  $App::JobLog::Log::Event::VERSION = '1.007';
 }
 
 # ABSTRACT: basically adds an end time to App::JobLog::Log::Line events
@@ -138,9 +138,9 @@ sub split_days {
         do {
             my $clone = $self->clone;
             $clone->start = $s;
-            $clone->end   = $days_end;
+            $s            = $days_end->clone;
+            $clone->end   = $s;
             push @splits, $clone;
-            $s = $days_end->clone;
             $days_end->add( days => 1 );
         } while ( $days_end < $self->end );
         my $clone = $self->clone;
@@ -187,7 +187,7 @@ App::JobLog::Log::Event - basically adds an end time to App::JobLog::Log::Line e
 
 =head1 VERSION
 
-version 1.006
+version 1.007
 
 =head1 DESCRIPTION
 
