@@ -41,4 +41,3 @@ t/data/normal.log
 t/data/small.log
 t/data/tiny.log
 t/make_log.pl
-test_log

@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 BEGIN {
-  $App::JobLog::Log::Day::VERSION = '1.007';
+  $App::JobLog::Log::Day::VERSION = '1.009';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -81,7 +81,7 @@ sub times {
 
 
 sub display {
-    my ( $self, $previous, $format, $columns, $screen_width ) = @_;
+    my ( $self, $format, $columns, $screen_width, $show_year ) = @_;
     return if $self->is_empty;
 
     # cache some bits from the $columns hash
@@ -93,10 +93,7 @@ sub display {
 
     # date
     if ($show_date) {
-        my $f =
-          !( $previous && $previous->start->year == $self->start->year )
-          ? '%A, %e %B, %Y'
-          : '%A, %e %B';
+        my $f = $show_year ? '%A, %e %B, %Y' : '%A, %e %B';
         print $self->start->strftime($f), "\n";
     }
 
@@ -172,7 +169,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.007
+version 1.009
 
 =head1 DESCRIPTION
 

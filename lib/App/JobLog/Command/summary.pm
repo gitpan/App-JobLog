@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.007';
+  $App::JobLog::Command::summary::VERSION = '1.009';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -109,8 +109,8 @@ sub execute {
     };
 
     # parse time expression
-    my $days;
-    eval { $days = summary join( ' ', @$args ), $test, $hidden };
+    my ($days, $show_year);
+    eval { ($days, $show_year) = summary join( ' ', @$args ), $test, $hidden };
     $self->usage_error($@) if $@;
     unless ( $opt->{hidden} ) {
 
@@ -142,7 +142,7 @@ sub execute {
             display [$duck_day], $merge_level, $hidden, $screen_width;
         }
         else {
-            display $days, $merge_level, $hidden, $screen_width;
+            display $days, $merge_level, $hidden, $screen_width, $show_year;
         }
 
         # check for long task
@@ -429,7 +429,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.007
+version 1.009
 
 =head1 SYNOPSIS
 
