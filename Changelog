@@ -1,6 +1,6 @@
 Revision history for App::JobLog
 
-1.009     2011-03-13 15:14:27 America/New_York
+1.008     2011-03-13 15:13:04 America/New_York
   * changed date format code to show year if span in question stretches over more than one year
   * unrolled slow loop in summary after Devel::NYTProf profiling
 
