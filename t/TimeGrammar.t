@@ -21,6 +21,24 @@ $ENV{ DIRECTORY() } = $dir;
 my $now = DateTime->new( year => 2011, month => 2, day => 18, time_zone => tz );
 $App::JobLog::Time::now = $now;
 
+subtest 'regressions' => sub {
+    my %dates = (
+        'jan 1 - 10'    => [ [qw(2011 1 1 0 0 0)],  [qw(2011 1 10 23 59 59)] ],
+        'jan 1'         => [ [qw(2011 1 1 0 0 0)],  [qw(2011 1 1 23 59 59)] ],
+        'december 2010' => [ [qw(2010 12 1 0 0 0)], [qw(2010 12 31 23 59 59)] ],
+        '2010.12'       => [ [qw(2010 12 1 0 0 0)], [qw(2010 12 31 23 59 59)] ],
+        '2011'          => [ [qw(2011 1 1 0 0 0)],  [qw(2011 12 31 23 59 59)] ],
+        'jan 1 - 28'    => [ [qw(2011 1 1 0 0 0)],  [qw(2011 1 28 23 59 59)] ],
+    );
+    plan tests => 2 * keys %dates;
+    for my $date ( sort keys %dates ) {
+        my ( $s,  $e )  = parse($date);
+        my ( $st, $et ) = @{ $dates{$date} };
+        ok( time_test( $s, $st ), "correct start time for '$date'" );
+        ok( time_test( $e, $et ), "correct end time for '$date'" );
+    }
+};
+
 subtest 'single dates with times' => sub {
     my %dates = (
         'Thursday'    => [ [ 8, 30 ], [ 2011, 2, 17 ] ],

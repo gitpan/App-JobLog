@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 BEGIN {
-  $App::JobLog::TimeGrammar::VERSION = '1.008';
+  $App::JobLog::TimeGrammar::VERSION = '1.010';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -351,10 +351,11 @@ sub parse {
         my $unit = delete $h1->{unit};
         normalize($h1);
         if ($unit) {
+
             # $h1 is necessarily fixed and there is no time associated
-    $h1 = fix_date( $h1, 1 );
-    my $h2 = $h1->clone->add($unit => 1)->subtract(seconds=>1);
-    return $h1, $h2, 1;
+            $h1 = fix_date( $h1, 1 );
+            my $h2 = $h1->clone->add( $unit => 1 )->subtract( seconds => 1 );
+            return $h1, $h2, 1;
         }
         else {
             my %t1 = extract_time( $h1, 1 );
@@ -374,13 +375,13 @@ sub parse {
             my ( $s1, $s2 ) = ( $t1{suffix}, $t2{suffix} );
             delete $t1{suffix}, delete $t2{suffix};
             if ( is_fixed($h1) ) {
-                ( $h1, $h2 ) = fixed_start( $h1, $h2 );
+                ( $h1, $h2 ) = fixed_start( $h1, $h2, $count == 2 );
             }
             elsif ( is_fixed($h2) ) {
                 ( $h1, $h2 ) = fixed_end( $h1, $h2 );
             }
             else {
-                ( $h1, $h2 ) = before_now( $h1, $h2 );
+                ( $h1, $h2 ) = before_now( $h1, $h2, $count == 2 );
             }
             croak "dates in \"$phrase\" are out of order"
               unless DateTime->compare( $h1, $h2 ) <= 0;
@@ -496,8 +497,12 @@ sub time_unit {
 
 # produces interpretation of date expression consistent with a fixed start date
 sub fixed_start {
-    my ( $h1, $h2 ) = @_;
+    my ( $h1, $h2, $two_endpoints ) = @_;
     $h1 = fix_date( $h1, 1 );
+    unless ( $two_endpoints || $h2->{type} ne 'numeric' ) {
+        return $h1, $h1->clone if defined $h2->{day};
+        return $h1, $h1->clone->add( years => 1 )->subtract( days => 1 );
+    }
     if ( is_fixed($h2) ) {
         $h2 = fix_date($h2);
     }
@@ -629,8 +634,11 @@ sub fix_date {
                         $date->add( months => 1 ) unless $is_start;
                     }
                     when ('wee') {
+                        my $is_sunday = $date->day_of_week == 7;
                         $date->truncate( to => 'week' );
-                        $date->subtract( days => 1 ) if sunday_begins_week();
+                        if (sunday_begins_week) {
+                            $date->subtract( days => $is_sunday ? -6 : 1 );
+                        }
                         $date->add( weeks => 1 ) unless $is_start;
                     }
                     when ('yea') {
@@ -661,8 +669,11 @@ sub fix_date {
                         }
                     }
                     when ('wee') {
+                        my $is_sunday = $date->day_of_week == 7;
                         $date->truncate( to => 'week' );
-                        $date->subtract( days => 1 ) if sunday_begins_week();
+                        if (sunday_begins_week) {
+                            $date->subtract( days => $is_sunday ? -6 : 1 );
+                        }
                         if ($is_start) {
                             $date->subtract( weeks => 1 );
                         }
@@ -762,20 +773,54 @@ sub init_hash {
 # produces interpretation of date expression such that neither date ends after
 # the present
 sub before_now {
-    my ( $h1, $h2 ) = @_;
+    my ( $h1, $h2, $two_endpoints ) = @_;
+    infer_missing( $h1, $h2 ) if $two_endpoints;
     my $now = today;
     my ( $u1, $amt1, $u2, $amt2 ) = ( time_unit($h1), time_unit($h2) );
     ( $h1, $h2 ) =
       ( decontextualized_date( $h1, 1 ), decontextualized_date($h2) );
     $h2 = adjust_weekday( $h2, $now ) unless ref $h2 eq 'DateTime';
     $h1 = adjust_weekday( $h1, $now ) unless ref $h1 eq 'DateTime';
-    while ( DateTime->compare( $now, $h2 ) < 0 ) {
+    while ( $now < $h2 ) {
         $h2->subtract( $u2 => $amt2 );
     }
-    while ( DateTime->compare( $h2, $h1 ) < 0 ) {
+    while ( $h2 < $h1 ) {
         $h1->subtract( $u1 => $amt1 );
     }
+
+    if ($two_endpoints) {
+
+        # move the two dates as close together as possible
+        while ( $h1 < $h2 ) {
+            $h2->subtract( $u2 => $amt2 );
+        }
+        $h2->add( $u2 => $amt2 );
+    }
     return $h1, $h2;
+}
+
+# fill in missing fields in two date hashes, each using the other as context
+# this is a bit of a hack, but a natural hack
+sub infer_missing {
+    my ( $h1, $h2 ) = @_;
+    if ( $h1->{type} eq $h2->{type} ) {
+        while ( my ( $k, $v ) = each %$h1 ) {
+            $h2->{$k} //= $v;
+        }
+        while ( my ( $k, $v ) = each %$h2 ) {
+            $h1->{$k} //= $v;
+        }
+    }
+    elsif ( $h2->{type} eq 'numeric' ) {
+        if ( $h1->{month} && !$h2->{month} ) {
+            init_month_abbr();
+            $h2->{month} = $month_abbr{ $h1->{month} };
+        }
+    }
+    else {
+
+        # I don't think we have any problems in this case
+    }
 }
 
 # normalizes string values
@@ -835,7 +880,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.008
+version 1.010
 
 =head1 SYNOPSIS
 
@@ -915,7 +960,7 @@ to facilitate finding them.
               <full_month> = "january" | "february" | "march" | "april" | "may" | "june" | "july" | "august" | "september" | "october" | "november" | "december" 
             <full_no_time> = <dm_full> | <md_full>
             <full_weekday> = "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"
-                     <iso> = d{4} ( <divider> ) d{1,2} \1 d{1,2}
+                     <iso> = d{4} ( <divider> ) d{1,2} \\1 d{1,2}
                       <md> = d{1,2} <divider> d{1,2}
                  <md_full> = <month> s d{1,2} "," s d{4}
           <modifiable_day> = <at_time_on> <modifiable_day_no_time> | <modifiable_day_no_time> <at_time>
@@ -944,7 +989,7 @@ to facilitate finding them.
                  <termini> = [ "the" s ] ( <beginning> | "end" )
                     <time> = d{1,2} [ : d{2} [ : d{2} ] ] [ s* <time_suffix> ]
              <time_suffix> = ( "a" | "p" ) ( "m" | ".m." )
-                      <us> = d{1,2} ( <divider> ) d{1,2} \1 d{4}
+                      <us> = d{1,2} ( <divider> ) d{1,2} \\1 d{4}
                   <verbal> = <my> | <named_period> | <relative_period> | <month_day> | <full>  
                  <weekday> = <full_weekday> | <short_weekday>
                     <year> = d{4}
@@ -982,6 +1027,10 @@ safe ignoring the second endpoing, but you should check the count to make sure t
 didn't provide a second endpoint.
 
 This code croaks when it cannot parse the expression, so exception handling is recommended.
+
+=head1 SEE ALSO
+
+L<App::JobLog::Command::parse>
 
 =head1 AUTHOR
 

@@ -1,6 +1,6 @@
 package App::JobLog::Time;
 BEGIN {
-  $App::JobLog::Time::VERSION = '1.008';
+  $App::JobLog::Time::VERSION = '1.010';
 }
 
 # ABSTRACT: consolidates basic time functions into one location
@@ -49,7 +49,7 @@ App::JobLog::Time - consolidates basic time functions into one location
 
 =head1 VERSION
 
-version 1.008
+version 1.010
 
 =head1 DESCRIPTION
 

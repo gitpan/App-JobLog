@@ -1,6 +1,16 @@
 Revision history for App::JobLog
 
-1.008     2011-03-13 15:13:04 America/New_York
+1.010     2011-03-15 17:26:53 America/New_York
+  * fixed "last/this week" bug due to DateTime choosing Monday as first day in week
+  * fixed edit command so checksums are calculated correctly and backup is only saved in case of change
+  * fixed TimeGrammar; "jan 1 - 10" and such are properly handled
+  * fixed TimeGrammar; '2010' and such are properly handled
+  * fixed bug caused by end of month wrapping in DateTime
+  * changing the options for the info command so minimal information is returned by default
+  * improved text wrapping of full description for commands
+  * finished text of info command
+
+1.009     2011-03-13 15:14:27 America/New_York
   * changed date format code to show year if span in question stretches over more than one year
   * unrolled slow loop in summary after Devel::NYTProf profiling
 

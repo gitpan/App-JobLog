@@ -3,6 +3,7 @@
 # ABSTRACT: for debugging single time expressions
 
 use Modern::Perl;
+use lib 'lib';
 use App::JobLog::TimeGrammar;
 use File::Temp;
 use DateTime;

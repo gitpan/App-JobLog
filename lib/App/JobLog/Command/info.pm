@@ -1,6 +1,6 @@
 package App::JobLog::Command::info;
 BEGIN {
-  $App::JobLog::Command::info::VERSION = '1.008';
+  $App::JobLog::Command::info::VERSION = '1.010';
 }
 
 # ABSTRACT: provides general App::JobLog information
@@ -23,13 +23,10 @@ sub execute {
     my ( $self, $opt, $args ) = @_;
     my ( $fh, $fn ) = tempfile( UNLINK => 1 );
     my $executable = prog_name($0);
-    my $text =
-        $self->_header($executable)
-      . $self->_basic_usage($executable)
-      . $self->_footer($executable);
+    my $text;
     my @options = ( -verbose => 2, -exitval => 0, -input => $fn );
     given ( $opt->verbosity ) {
-        when ('verbose') {
+        when ('man') {
             $text =
                 $self->_header($executable)
               . $self->_body($executable)
@@ -41,11 +38,17 @@ sub execute {
                 push @options, -noperldoc => 1;
             }
         }
-        when ('quiet') {
+        when ('verbose') {
+            $text =
+                $self->_header($executable)
+              . $self->_basic_usage($executable)
+              . $self->_footer($executable);
+            push @options, -noperldoc => 1;
+        }
+        default {
             $text = $self->_header($executable) . $self->_footer($executable);
             push @options, -noperldoc => 1;
         }
-        default { push @options, -noperldoc => 1 }
     }
 
     $text = <<END;
@@ -73,8 +76,8 @@ sub options {
         [
             "verbosity" => hidden => {
                 one_of => [
-                    [ 'quiet|q'       => 'minimal documentation' ],
-                    [ 'verbose|man|v' => 'extensive documentation in pager' ],
+                    [ 'verbose|v' => 'longer documentation' ],
+                    [ 'man'       => 'extensive documentation in pager' ],
                 ],
             }
         ]
@@ -197,11 +200,92 @@ When you come back to work you can type
 
 to add a new line to the log with the same description and tags as the last task you began.
 
-TODO talk about summary and obtaining full list of commands
+==head2 Summary Commands
+
+The log is of little use if you cannot extract useful reports of what it contains. For this there are a
+variety of commands.
+
+==over 8
+
+==item B<@{[App::JobLog::Command::summary->name]}>
+
+The most extensive and featureful log report command. Example:
+
+ \$ job summary yesterday
+ Monday, 14 March
+    9:46 - 10:11 am  0.41  widgets  modifying name normalization code to use dates                                                                                
+   10:17 - 10:55 am  0.62  widgets  modifying name normalization code to use dates                                                                                
+     1:49 - 2:08 pm  0.32  widgets  testing PGA file to see whether Felix Frankfurter is still there                                                              
+ 
+   TOTAL HOURS 1.35
+    widgets    1.35
+
+==item B<@{[App::JobLog::Command::last->name]}>
+
+The last event recorded. Example:
+
+ \$ job last
+ Tuesday, 15 March
+   5:07 pm - ongoing  0.00  foo  muttering                                                                                                                         
+
+   TOTAL HOURS 0.00
+   foo         0.00
+
+==item B<@{[App::JobLog::Command::today->name]}>
+
+Everything you've done today. Example:
+
+ \$ job today
+ Tuesday, 15 March
+   11:33 - 11:35 am  0.04  widgets  checking up on Lem's issue with pipeline                                                                                     
+   11:38 - 11:46 am  0.12  widgets  checking up on Lem's issue with pipeline; figuring out null pointer in multi-threaded code                                   
+    12:40 - 1:11 pm  0.52  widgets  debugging null pointers                                                                                                       
+
+   TOTAL HOURS 0.68
+    widgets    0.68
+
+==back
+
+==head2 Obtaining Further Information
+
+If you wish further information there are severals routes:
+
+==over 8
+
+==item B<$executable>
+
+If you invoke B<Job Log> without any arguments you will receive a list of its commands.
+
+==item B<$executable commands>
+
+Another way to obtain a list of commands.
+
+==item B<--help>
+
+Every command has a C<--help> option which will provide minimal help text and a complete list of the options the command
+understands.
+
+==item B<$executable help <command>>
+
+The C<help> command will provide a command's full usage text.
+
+==item B<$executable @{[__PACKAGE__->name]} --man>
+
+This command's C<--man> option provides still more extensive help text.
+
+==item B<perldoc>
+
+The Perl modules of which this application is composed each have their own documentation. For example, try
+
+  perldoc App::JobLog
+
+==back
 
 B<TIP:> any unambigous prefix of a command will do. All the following are equivalent:
 
 @{[join "\n", map {"   $executable $_ doing something"} $self->_unambiguous_prefixes(App::JobLog::Command::add->name)]}
+
+This means that for almost all commands you need only use the first letter of the command name.
 END
 }
 
@@ -211,20 +295,20 @@ sub _advanced_usage {
     
 ==head1 Environment Variables
 
-B<Job Log> may be configured in part by two environment variables:
+B<Job Log> is sensitive to a single environment variable:
 
-==over 8
+==head2 @{[DIRECTORY()]}
 
-==item @{[DIRECTORY()]}
-
-By default B<Job Log> keeps the log and all other files in a hidden directory called .joblog in your home
-directory. If @{[DIRECTORY()]} is set, however, it will keep this files here.
-
-==back
+By default B<Job Log> keeps the log and all other files in a hidden directory called F<.joblog> in your home
+directory. If @{[DIRECTORY()]} is set, however, it will keep this files here. This is mostly useful for
+testing, though if you find F<.joblog> already is in use by some other application you can use this variable
+to prevent collisions. Collisions will only occur if the files F<log> or F<config.ini> exist in this
+directory, and B<Job Log> will only alter these files if you append an event to the log or modify some
+configuration parameters.
 
 All other configuration is done through the B<@{[App::JobLog::Command::configure->name]}> command.
 
-==head1 Date Grammar
+==head1 Time Expressions
 
 B<Job Log> goes to considerable trouble to interpret whatever time expressions you might throw at it.
 For example, it understands all of the following:
@@ -244,11 +328,27 @@ For example, it understands all of the following:
    june 14
    last month - 6.14
    pay period
+   2010
+   June 2010
+   2010/6
+   Feb 1 - 14
+   ever
 
 Every expression represents an interval of time. It either names an interval or defines it as the span from
 the beginning of one interval to the end of another.
 
-TODO provide the BNF grammar used in time parsing
+==head2 Time Grammar
+
+Here is a complete BNF-style grammar of the time expressions understood by B<Job Log>. In this set of rules
+C<s> represents some amount of whitespace, C<d> represents a digit, and C<\\x>, where C<x> is a number,
+represents a back reference to the corresponding matched group in the same rule. After the first three
+rules the remainder are alphabetized to facilitate finding them in the list. All expressions must match the
+first rule.
+
+If you find this system of rules opaque or unwieldy, you can use the B<@{[App::JobLog::Command::parse->name]}> 
+command to test an expression and see what time interval it is interpreted as.
+
+@{[_bnf()]}
 END
 }
 
@@ -286,7 +386,7 @@ sub _bnf {
               <full_month> = "january" | "february" | "march" | "april" | "may" | "june" | "july" | "august" | "september" | "october" | "november" | "december" 
             <full_no_time> = <dm_full> | <md_full>
             <full_weekday> = "sunday" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday"
-                     <iso> = d{4} ( <divider> ) d{1,2} \1 d{1,2}
+                     <iso> = d{4} ( <divider> ) d{1,2} \\1 d{1,2}
                       <md> = d{1,2} <divider> d{1,2}
                  <md_full> = <month> s d{1,2} "," s d{4}
           <modifiable_day> = <at_time_on> <modifiable_day_no_time> | <modifiable_day_no_time> <at_time>
@@ -315,7 +415,7 @@ sub _bnf {
                  <termini> = [ "the" s ] ( <beginning> | "end" )
                     <time> = d{1,2} [ : d{2} [ : d{2} ] ] [ s* <time_suffix> ]
              <time_suffix> = ( "a" | "p" ) ( "m" | ".m." )
-                      <us> = d{1,2} ( <divider> ) d{1,2} \1 d{4}
+                      <us> = d{1,2} ( <divider> ) d{1,2} \\1 d{4}
                   <verbal> = <my> | <named_period> | <relative_period> | <month_day> | <full>  
                  <weekday> = <full_weekday> | <short_weekday>
                     <year> = d{4}
@@ -335,7 +435,7 @@ App::JobLog::Command::info - provides general App::JobLog information
 
 =head1 VERSION
 
-version 1.008
+version 1.010
 
 =head1 SYNOPSIS
 
@@ -364,6 +464,13 @@ The synopsis says it all. For command specific help you should try the help comm
  tags not to match are provided, only those events that contain none of these tags will be shown.
  
  if you provide description filters to match or avoid, these will be interpreted as regexes. try 'perldoc perlre'
+
+This module is basically a number of globs of POD munged a bit, concatenated in various ways, and passed
+to L<Pod::Usage>.
+
+=head1 SEE ALSO
+
+L<Pod::Usage>, L<App::JobLog::Command::help>
 
 =head1 AUTHOR
 

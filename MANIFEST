@@ -16,6 +16,7 @@ lib/App/JobLog/Command/edit.pm
 lib/App/JobLog/Command/info.pm
 lib/App/JobLog/Command/last.pm
 lib/App/JobLog/Command/modify.pm
+lib/App/JobLog/Command/parse.pm
 lib/App/JobLog/Command/resume.pm
 lib/App/JobLog/Command/summary.pm
 lib/App/JobLog/Command/today.pm

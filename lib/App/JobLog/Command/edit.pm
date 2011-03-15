@@ -1,6 +1,6 @@
 package App::JobLog::Command::edit;
 BEGIN {
-  $App::JobLog::Command::edit::VERSION = '1.008';
+  $App::JobLog::Command::edit::VERSION = '1.010';
 }
 
 # ABSTRACT: edit the log
@@ -10,11 +10,11 @@ use Modern::Perl;
 use Class::Autouse qw{
   App::JobLog::Log
   App::JobLog::Log::Line
+  Digest::MD5
   FileHandle
 };
 use autouse 'File::Temp'                => qw(tempfile);
 use autouse 'File::Copy'                => qw(copy);
-use autouse 'Digest::MD5'               => qw(md5);
 use autouse 'App::JobLog::Config'       => qw(editor log);
 use autouse 'Getopt::Long::Descriptive' => qw(prog_name);
 use autouse 'App::JobLog::TimeGrammar'  => qw(parse);
@@ -53,10 +53,11 @@ sub execute {
             copy( $log, $fh );
             $fh->close;
             $fh = FileHandle->new($log);
-            my $md51 = md5($fh);
+            my $md5  = Digest::MD5->new;
+            my $md51 = $md5->addfile($fh)->hexdigest;
             system "$editor $log";
             $fh = FileHandle->new($log);
-            my $md52 = md5($fh);
+            my $md52 = $md5->reset->addfile($fh)->hexdigest;
 
             if ( $md51 ne $md52 ) {
                 $fh = FileHandle->new( "$log.bak", 'w' );
@@ -93,7 +94,7 @@ Closing an open task is the only edit you'll commonly have to make (it's
 easy to forget to close the last task of the day). Fortunately, it is the easiest
 edit to perform. You simply type
 
-@{[prog_name]} @{[__PACKAGE__->name]} --close yesterday at 8:00 pm
+  @{[prog_name]} @{[__PACKAGE__->name]} --close yesterday at 8:00 pm
 
 for example and @{[prog_name]} will insert the appropriate line if it can do so.
 If it can't because there is no open task at the time specified, it will emit a warning
@@ -159,7 +160,7 @@ App::JobLog::Command::edit - edit the log
 
 =head1 VERSION
 
-version 1.008
+version 1.010
 
 =head1 SYNOPSIS
 

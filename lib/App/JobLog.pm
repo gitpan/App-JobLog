@@ -1,6 +1,6 @@
 package App::JobLog;
 BEGIN {
-  $App::JobLog::VERSION = '1.008';
+  $App::JobLog::VERSION = '1.010';
 }
 use App::Cmd::Setup -app;
 
@@ -20,7 +20,7 @@ App::JobLog - base of work log application
 
 =head1 VERSION
 
-version 1.008
+version 1.010
 
 =head1 SYNOPSIS
 
@@ -37,6 +37,7 @@ version 1.008
         info: describe job log
         last: describe the last task recorded
       modify: add details to last event
+       parse: parse a time expression
       resume: resume last closed task
      summary: list tasks with certain properties in a particular time range
        today: what has happened today
@@ -128,7 +129,10 @@ a time stamp, a description, and perhaps other meta-data. The problem with a log
 numbing to scroll through it for anything but the most recent events, and with a job log what you usually want
 isn't time stamps but durations. So in addition to a logging facility we want a report extraction facility. Finally,
 we often want to filter out particular activities and categorize them in various ways, so along with the time stamps
-and descriptions we want tags. That's about it.
+and descriptions we want tags. That's about it. Besides this minimal functionality we want the log to impose as few
+restrictions as possible so that we don't need to think about how it works. We don't want to worry about characters
+with special valence so the log has to handle its own escaping of spaces and colons and so forth. We don't want to
+worry about character encoding so the log has to be in Unicode (utf8).
 
 B<App::JobLog> keeps its documents, by default, in a hidden directory in your home directory called F<.joblog/>. These
 documents are a README file explaining to anyone who stumbles across the directory what it's function is, a log, called
@@ -206,10 +210,24 @@ See L<App::JobLog::Command::vacation>.
 
 =back
 
+=head2 WHY NOT A DATABASE?
+
+We basically want database functionality out of our job log -- random access, selecting rows by various
+properties, nice reports. Why not use SQLite, say, or Berkeley DB? Well first of all, that adds dependencies,
+and we want fewer of those. And except in extraordinary circumstances we are only adding events in sequence and we
+will only be interested in the most recent ones. Even when we don't just want the most recent events we
+don't need truly random access to the whole log but an interval -- all the lines from one point to another.
+We only need a slightly glorified log. A database is overkill. Finally, as soon as we maintain our data in
+a database it becomes an opaque blob of data and our editing interface becomes much more complicated to
+write, use, and maintain. We need to write a shell, GUI, or ncurses interface and figure out how to provide
+the editor with search facilities, the context in which she is making edits, and perhaps an undo/redo stack.
+If it's a text file we just pop up an editor and validate the log on close. So I stuck with a log.
+
 =head1 ACKNOWLEDGEMENTS
 
 Thanks to Ricardo Signes for the redoubtable L<App::Cmd> which wires this all together, Dave Rolsky for L<DateTime>,
-which does all the calendar math, and Ingy dE<ouml>t Net for L<IO:All>, which makes random access to a log file trivial.
+which does all the calendar math, and Ingy dE<ouml>t Net for L<IO:All>, which, via L<Tie::File> (thanks, Mark Jason
+Dominus), makes random access to a log file trivial.
 
 Thanks also to my wife Paula, who was my only beta tester other than myself.
 
