@@ -1,6 +1,6 @@
 package App::JobLog::Time;
 BEGIN {
-  $App::JobLog::Time::VERSION = '1.010';
+  $App::JobLog::Time::VERSION = '1.011';
 }
 
 # ABSTRACT: consolidates basic time functions into one location
@@ -16,6 +16,7 @@ our @EXPORT_OK = qw(
 use Modern::Perl;
 use DateTime;
 use DateTime::TimeZone;
+use App::JobLog::Config qw(time_zone);
 
 # cached values
 our ( $today, $now, $tz );
@@ -34,7 +35,7 @@ sub today {
 
 
 sub tz {
-    $tz //= DateTime::TimeZone->new( name => 'local' );
+    $tz //= DateTime::TimeZone->new( name => time_zone );
     return $tz;
 }
 
@@ -49,7 +50,7 @@ App::JobLog::Time - consolidates basic time functions into one location
 
 =head1 VERSION
 
-version 1.010
+version 1.011
 
 =head1 DESCRIPTION
 

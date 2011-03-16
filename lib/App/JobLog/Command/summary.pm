@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.010';
+  $App::JobLog::Command::summary::VERSION = '1.011';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -429,7 +429,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.010
+version 1.011
 
 =head1 SYNOPSIS
 

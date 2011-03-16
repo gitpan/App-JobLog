@@ -1,6 +1,6 @@
 package App::JobLog::Log::Synopsis;
 BEGIN {
-  $App::JobLog::Log::Synopsis::VERSION = '1.010';
+  $App::JobLog::Log::Synopsis::VERSION = '1.011';
 }
 
 # ABSTRACT: consolidates App::JobClock::Log::Event objects for display
@@ -270,7 +270,7 @@ App::JobLog::Log::Synopsis - consolidates App::JobClock::Log::Event objects for 
 
 =head1 VERSION
 
-version 1.010
+version 1.011
 
 =head1 DESCRIPTION
 

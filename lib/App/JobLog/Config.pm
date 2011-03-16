@@ -1,6 +1,6 @@
 package App::JobLog::Config;
 BEGIN {
-  $App::JobLog::Config::VERSION = '1.010';
+  $App::JobLog::Config::VERSION = '1.011';
 }
 
 # ABSTRACT: central depot for App::JobLog configuration parameters and controller allowing their modification
@@ -23,6 +23,7 @@ our @EXPORT_OK = qw(
   readme
   start_pay_period
   sunday_begins_week
+  time_zone
   vacation
   workdays
   DAYS
@@ -34,6 +35,7 @@ our @EXPORT_OK = qw(
   PERIOD
   PRECISION
   SUNDAY_BEGINS_WEEK
+  TIME_ZONE
   WORKDAYS
 );
 
@@ -77,7 +79,7 @@ use constant DAYS => 'S' . WORKDAYS . 'A';
 use constant MERGE => 'adjacent same tags';
 
 # name of hide nothing "column"
-use constant NONE_COLUMN     => 'none';
+use constant NONE_COLUMN => 'none';
 
 # array of hidable columns
 use constant HIDABLE_COLUMNS => [
@@ -89,6 +91,9 @@ use constant HIDABLE_COLUMNS => [
       time
       )
 ];
+
+# default time zone; necessary because Cygwin doesn't support local
+use constant TIME_ZONE => $^O eq 'cygwin' ? 'floating' : 'local';
 
 
 sub init_file {
@@ -308,6 +313,12 @@ sub is_hidden {
     return $hidden_columns{$value};
 }
 
+
+sub time_zone {
+    my ($value) = @_;
+    return _param( 'time_zone', TIME_ZONE, 'time', $value );
+}
+
 1;
 
 __END__
@@ -319,7 +330,7 @@ App::JobLog::Config - central depot for App::JobLog configuration parameters and
 
 =head1 VERSION
 
-version 1.010
+version 1.011
 
 =head1 DESCRIPTION
 
@@ -400,6 +411,10 @@ Returns those columns never displayed by summary command.
 =head2 is_hidden
 
 Whether a particular column is among those hidden.
+
+=head2 time_zone
+
+Time zone used for time calculations.
 
 =head1 AUTHOR
 

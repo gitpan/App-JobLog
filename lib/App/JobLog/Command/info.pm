@@ -1,6 +1,6 @@
 package App::JobLog::Command::info;
 BEGIN {
-  $App::JobLog::Command::info::VERSION = '1.010';
+  $App::JobLog::Command::info::VERSION = '1.011';
 }
 
 # ABSTRACT: provides general App::JobLog information
@@ -46,7 +46,12 @@ sub execute {
             push @options, -noperldoc => 1;
         }
         default {
-            $text = $self->_header($executable) . $self->_footer($executable);
+            $text = $self->_header($executable) . <<END . $self->_footer($executable);
+
+==head1 For More Information
+
+  $executable info --help
+END
             push @options, -noperldoc => 1;
         }
     }
@@ -359,7 +364,7 @@ sub _footer {
 ==head1 License etc.
 
  Author        David Houghton
-               dfhoughton at gmail dot com
+               dfhoughton\@gmail.com
  Copyright (c) 2011
  License       Perl_5
 END
@@ -435,7 +440,7 @@ App::JobLog::Command::info - provides general App::JobLog information
 
 =head1 VERSION
 
-version 1.010
+version 1.011
 
 =head1 SYNOPSIS
 

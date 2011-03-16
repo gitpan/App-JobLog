@@ -1,6 +1,6 @@
 package App::JobLog;
 BEGIN {
-  $App::JobLog::VERSION = '1.010';
+  $App::JobLog::VERSION = '1.011';
 }
 use App::Cmd::Setup -app;
 
@@ -20,7 +20,7 @@ App::JobLog - base of work log application
 
 =head1 VERSION
 
-version 1.010
+version 1.011
 
 =head1 SYNOPSIS
 
@@ -86,6 +86,7 @@ version 1.010
  precision                           2
  start pay period           2009-01-11
  sunday begins week               true
+ time zone                       local
  workdays                        MTWHF
  houghton@NorthernSpy:~$ job conf --precision 1
  precision set to 1
@@ -146,7 +147,7 @@ are listed below.
 
 =over 8
 
-=item help
+=item B<help>
 
 Provides extended help information for a particular command. E.g.
 
@@ -159,51 +160,56 @@ Provides extended help information for a particular command. E.g.
  Events may be filtered in numerous ways: by tag, time of day, or terms used in descriptions.
  ...
 
-=item commands
+=item B<commands>
 
 Provides the list of available commands.
 
-=item add
+=item L<add|App::JobLog::Command::add>
 
 Appends an event to the end of the log. See L<App::JobLog::Command::add>.
 
-=item configure
+=item L<configure|App::JobLog::Command::configure>
 
 Lists or modifies configuration parameters. See L<App::JobLog::Command::configure>.
 
-=item done
+=item L<done|App::JobLog::Command::done>
 
 Appends an event to the log marking the last event as done. See L<App::JobLog::Command::done>.
 
-=item edit
+=item L<edit|App::JobLog::Command::edit>
 
 Edit the log safely. See L<App::JobLog::Command::edit>.
 
-=item info
+=item L<info|App::JobLog::Command::info>
 
 Provides extended general help text. See L<App::JobLog::Command::info>.
 
-=item last
+=item L<last|App::JobLog::Command::last>
 
 Describes the last event in the log. See L<App::JobLog::Command::last>.
 
-=item modify
+=item L<modify|App::JobLog::Command::modify>
 
 Modifies the last event in the log. See L<App::JobLog::Command::modify>.
 
-=item resume
+=item L<parse|App::JobLog::Command::parse>
+
+Parse a time expression to discover what the application understands it to mean. 
+See L<App::JobLog::Command::parse>.
+
+=item L<resume|App::JobLog::Command::resume>
 
 Resumes the last closed event in the log. See L<App::JobLog::Command::resume>.
 
-=item summary
+=item L<summary|App::JobLog::Command::summary>
 
 Presents a portion of the log in more human readable form. See L<App::JobLog::Command::summary>.
 
-=item today
+=item L<today|App::JobLog::Command::today>
 
 Summarizes everything done today. See L<App::JobLog::Command::today>.
 
-=item vacation
+=item L<vacation|App::JobLog::Command::vacation>
 
 Allows viewing and modification of a simple database of vacation times kept separately from the log.
 See L<App::JobLog::Command::vacation>.

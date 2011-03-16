@@ -1,5 +1,10 @@
 Revision history for App::JobLog
 
+1.011     2011-03-16 05:44:21 America/New_York
+  * cosmetic changes to info command
+  * further improvement to perldocs
+  * added time zone configuration parameter with Cygwin test so the Cygwin smoke test will pass
+
 1.010     2011-03-15 17:26:53 America/New_York
   * fixed "last/this week" bug due to DateTime choosing Monday as first day in week
   * fixed edit command so checksums are calculated correctly and backup is only saved in case of change
