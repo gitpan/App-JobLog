@@ -1,6 +1,6 @@
 package App::JobLog::Config;
 BEGIN {
-  $App::JobLog::Config::VERSION = '1.011';
+  $App::JobLog::Config::VERSION = '1.012';
 }
 
 # ABSTRACT: central depot for App::JobLog configuration parameters and controller allowing their modification
@@ -24,6 +24,7 @@ our @EXPORT_OK = qw(
   start_pay_period
   sunday_begins_week
   time_zone
+  _tz
   vacation
   workdays
   DAYS
@@ -226,9 +227,10 @@ sub start_pay_period {
     if ($value) {
         my @parts = split / /, $value;
         return DateTime->new(
-            year  => $parts[0],
-            month => $parts[1],
-            day   => $parts[2]
+            year      => $parts[0],
+            month     => $parts[1],
+            day       => $parts[2],
+            time_zone => _tz(),
         );
     }
     return undef;
@@ -319,6 +321,23 @@ sub time_zone {
     return _param( 'time_zone', TIME_ZONE, 'time', $value );
 }
 
+our $tz;
+
+# removed from App::JobLog::Time to prevent dependency cycle
+sub _tz {
+    if ( !defined $tz ) {
+        require DateTime::TimeZone;
+        eval { $tz = DateTime::TimeZone->new( name => time_zone() ) };
+        if ($@) {
+            print STDERR 'DateTime::TimeZone doesn\'t like the time zone '
+              . time_zone()
+              . "\nreverting to floating time\n full error: $@";
+            $tz = DateTime::TimeZone->new( name => 'floating' );
+        }
+    }
+    return $tz;
+}
+
 1;
 
 __END__
@@ -330,7 +349,7 @@ App::JobLog::Config - central depot for App::JobLog configuration parameters and
 
 =head1 VERSION
 
-version 1.011
+version 1.012
 
 =head1 DESCRIPTION
 

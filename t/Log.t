@@ -8,6 +8,7 @@ use File::Temp ();
 use App::JobLog::Config qw(log DIRECTORY);
 use App::JobLog::Log::Line;
 use App::JobLog::Log;
+use App::JobLog::Time qw(tz);
 use DateTime;
 use File::Spec;
 use IO::All -utf8;
@@ -20,9 +21,10 @@ my $dir = File::Temp->newdir();
 $ENV{ DIRECTORY() } = $dir;
 
 subtest 'empty log' => sub {
-    my $log  = App::JobLog::Log->new;
-    my $date = DateTime->new( year => 2011, month => 1, day => 1 );
-    my $end  = $date->clone->add( days => 1 )->subtract( seconds => 1 );
+    my $log = App::JobLog::Log->new;
+    my $date =
+      DateTime->new( year => 2011, month => 1, day => 1, time_zone => tz );
+    my $end = $date->clone->add( days => 1 )->subtract( seconds => 1 );
     is(
         exception {
             my $events = $log->find_events( $date, $end );
@@ -89,7 +91,12 @@ for my $size (qw(tiny small normal big)) {
             }
             my $ts = sprintf '%d/%02d/%02d', $1, $2, $3;
             unless ( $dates{$ts} ) {
-                my $date = DateTime->new( year => $1, month => $2, day => $3 );
+                my $date = DateTime->new(
+                    year      => $1,
+                    month     => $2,
+                    day       => $3,
+                    time_zone => tz
+                );
                 $dates{$ts} = 1;
                 push @dates, $date;
             }

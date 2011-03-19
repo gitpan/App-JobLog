@@ -1,6 +1,6 @@
 package App::JobLog::Command;
 BEGIN {
-  $App::JobLog::Command::VERSION = '1.011';
+  $App::JobLog::Command::VERSION = '1.012';
 }
 
 # ABSTRACT: common functionality of App::JobLog commands
@@ -99,7 +99,7 @@ App::JobLog::Command - common functionality of App::JobLog commands
 
 =head1 VERSION
 
-version 1.011
+version 1.012
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 package App::JobLog::Command::add;
 BEGIN {
-  $App::JobLog::Command::add::VERSION = '1.011';
+  $App::JobLog::Command::add::VERSION = '1.012';
 }
 
 # ABSTRACT: log an event
@@ -19,7 +19,7 @@ sub execute {
     }
     my $log        = App::JobLog::Log->new;
     my ($last)     = $log->last_event;
-    my $is_ongoing = $last->is_open;
+    my $is_ongoing = $last && $last->is_open;
     $log->append_event(
         $tags ? ( tags => $tags ) : (),
         description => [ join ' ', @$args ],
@@ -88,7 +88,7 @@ App::JobLog::Command::add - log an event
 
 =head1 VERSION
 
-version 1.011
+version 1.012
 
 =head1 SYNOPSIS
 

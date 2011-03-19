@@ -1,6 +1,6 @@
 package App::JobLog::Command::configure;
 BEGIN {
-  $App::JobLog::Command::configure::VERSION = '1.011';
+  $App::JobLog::Command::configure::VERSION = '1.012';
 }
 
 # ABSTRACT: examine or modify App::JobLog configuration
@@ -248,6 +248,15 @@ sub validate {
 "you have specified that something should be hidden and that nothing should be hidden"
         ) if $found_none && $found_something;
     }
+    if ( defined $opt->time_zone ) {
+        require DateTime::TimeZone;
+        eval { DateTime::TimeZone->new( name => $opt->time_zone ) };
+        $self->usage_error(
+                'DateTime::TimeZone does not like the time zone name '
+              . $opt->time_zone
+              . "\n$@" )
+          if $@;
+    }
 }
 
 1;
@@ -262,7 +271,7 @@ App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.011
+version 1.012
 
 =head1 SYNOPSIS
 

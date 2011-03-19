@@ -37,17 +37,19 @@ my %WriteMakefileArgs = (
     'DateTime' => '0',
     'DateTime::TimeZone' => '0',
     'Exporter' => '0',
+    'File::HomeDir' => '0',
     'File::ReadBackwards' => '0',
     'FileHandle' => '0',
     'IO::All' => '0',
     'Modern::Perl' => '0',
+    'Module::Build' => '0.3601',
     'Text::Wrap' => '0',
     'Text::WrapI18N' => '0',
     'autouse' => '0',
     'constant' => '0',
     'overload' => '0'
   },
-  'VERSION' => '1.011',
+  'VERSION' => '1.012',
   'test' => {
     'TESTS' => 't/*.t'
   }

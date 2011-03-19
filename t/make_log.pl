@@ -5,6 +5,7 @@
 use Modern::Perl;
 use File::Temp ();
 use App::JobLog::Config qw(log DIRECTORY);
+use App::JobLog::Time qw(tz);
 use App::JobLog::Log::Line;
 use App::JobLog::Log;
 use DateTime;
@@ -21,12 +22,13 @@ $ENV{ DIRECTORY() } = $dir;
 my $log = App::JobLog::Log->new;
 
 my $time = DateTime->new(
-    year   => 2011,
-    month  => 1,
-    day    => 1,
-    hour   => 1,
-    minute => 0,
-    second => 0,
+    year      => 2011,
+    month     => 1,
+    day       => 1,
+    hour      => 1,
+    minute    => 0,
+    second    => 0,
+    time_zone => tz,
 );
 
 # create log lines

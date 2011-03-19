@@ -1,5 +1,12 @@
 Revision history for App::JobLog
 
+1.012     2011-03-19 14:18:26 America/New_York
+  * added error handling for time zones unfamiliar to DateTime::TimeZone
+  * made sure time zones were handled uniformly throughout application
+  * added undiscovered File::HomeDir prerequisite
+  * added Module::Build prerequisite so install will succeed on a clean Ubuntu box
+  * fixed empty log bug in add command
+
 1.011     2011-03-16 05:44:21 America/New_York
   * cosmetic changes to info command
   * further improvement to perldocs

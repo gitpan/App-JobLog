@@ -4,7 +4,12 @@
 
 use Modern::Perl;
 
-use App::JobLog::Config qw(log start_pay_period pay_period_length DIRECTORY);
+use App::JobLog::Config qw(
+  DIRECTORY
+  log
+  pay_period_length
+  start_pay_period
+);
 use App::JobLog::Time qw(tz);
 use App::JobLog::TimeGrammar;
 use DateTime;
@@ -110,7 +115,8 @@ subtest 'periods' => sub {
 };
 
 subtest 'pay period' => sub {
-    my $start_pay_period = DateTime->new( year => 2011, month => 2, day => 13 );
+    my $start_pay_period =
+      DateTime->new( year => 2011, month => 2, day => 13, time_zone => tz );
     start_pay_period($start_pay_period);
     pay_period_length(14);
 
