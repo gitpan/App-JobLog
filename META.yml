@@ -26,8 +26,8 @@ requires:
   Carp: 0
   Class::Autouse: 0
   Config::Tiny: 0
-  DateTime: 0
-  DateTime::TimeZone: 0
+  DateTime: 0.66
+  DateTime::TimeZone: 1.30
   Exporter: 0
   File::HomeDir: 0
   File::ReadBackwards: 0
@@ -40,4 +40,4 @@ requires:
   autouse: 0
   constant: 0
   overload: 0
-version: 1.012
+version: 1.013

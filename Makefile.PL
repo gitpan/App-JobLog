@@ -34,8 +34,8 @@ my %WriteMakefileArgs = (
     'Carp' => '0',
     'Class::Autouse' => '0',
     'Config::Tiny' => '0',
-    'DateTime' => '0',
-    'DateTime::TimeZone' => '0',
+    'DateTime' => '0.66',
+    'DateTime::TimeZone' => '1.30',
     'Exporter' => '0',
     'File::HomeDir' => '0',
     'File::ReadBackwards' => '0',
@@ -49,7 +49,7 @@ my %WriteMakefileArgs = (
     'constant' => '0',
     'overload' => '0'
   },
-  'VERSION' => '1.012',
+  'VERSION' => '1.013',
   'test' => {
     'TESTS' => 't/*.t'
   }
