@@ -1,6 +1,6 @@
 package App::JobLog::Command::modify;
 BEGIN {
-  $App::JobLog::Command::modify::VERSION = '1.013';
+  $App::JobLog::Command::modify::VERSION = '1.014';
 }
 
 # ABSTRACT: modify last logged event
@@ -14,6 +14,7 @@ sub execute {
 
     my $log = App::JobLog::Log->new;
     my ( $e, $i ) = $log->last_event;
+    $self->usage_error('empty log') unless $e;
     my $ll = $e->data;
     if ( $opt->clear_tags ) {
         $ll->tags = [];
@@ -85,7 +86,7 @@ App::JobLog::Command::modify - modify last logged event
 
 =head1 VERSION
 
-version 1.013
+version 1.014
 
 =head1 SYNOPSIS
 

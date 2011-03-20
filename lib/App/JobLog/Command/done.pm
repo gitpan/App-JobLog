@@ -1,6 +1,6 @@
 package App::JobLog::Command::done;
 BEGIN {
-  $App::JobLog::Command::done::VERSION = '1.013';
+  $App::JobLog::Command::done::VERSION = '1.014';
 }
 
 # ABSTRACT: close last open event
@@ -14,7 +14,7 @@ sub execute {
 
     my $log = App::JobLog::Log->new;
     my ($last) = $log->last_event;
-    if ( $last->is_open ) {
+    if ( $last && $last->is_open ) {
         $log->append_event( done => 1 );
     }
     else {
@@ -38,7 +38,7 @@ App::JobLog::Command::done - close last open event
 
 =head1 VERSION
 
-version 1.013
+version 1.014
 
 =head1 SYNOPSIS
 
