@@ -4,7 +4,7 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
@@ -20,7 +20,7 @@ my %WriteMakefileArgs = (
     'perl' => '5.006'
   },
   'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+    'ExtUtils::MakeMaker' => '6.30'
   },
   'DISTNAME' => 'App-JobLog',
   'EXE_FILES' => [
@@ -49,7 +49,7 @@ my %WriteMakefileArgs = (
     'constant' => '0',
     'overload' => '0'
   },
-  'VERSION' => '1.014',
+  'VERSION' => '1.015',
   'test' => {
     'TESTS' => 't/*.t'
   }

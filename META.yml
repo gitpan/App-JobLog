@@ -10,9 +10,9 @@ build_requires:
   Test::More: 0
   perl: 5.006
 configure_requires:
-  ExtUtils::MakeMaker: 6.31
+  ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.200004, CPAN::Meta::Converter version 2.110580'
+generated_by: 'Dist::Zilla version 4.200006, CPAN::Meta::Converter version 2.110930'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -40,4 +40,4 @@ requires:
   autouse: 0
   constant: 0
   overload: 0
-version: 1.014
+version: 1.015

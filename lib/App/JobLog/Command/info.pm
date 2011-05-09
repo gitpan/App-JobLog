@@ -1,6 +1,6 @@
 package App::JobLog::Command::info;
 BEGIN {
-  $App::JobLog::Command::info::VERSION = '1.014';
+  $App::JobLog::Command::info::VERSION = '1.015';
 }
 
 # ABSTRACT: provides general App::JobLog information
@@ -418,7 +418,7 @@ sub _bnf {
            <short_weekday> = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" 
             <span_divider> = s* ( "-"+ | ( "through" | "thru" | "to" | "til" [ "l" ] | "until" ) ) s*
                  <termini> = [ "the" s ] ( <beginning> | "end" )
-                    <time> = d{1,2} [ : d{2} [ : d{2} ] ] [ s* <time_suffix> ]
+                    <time> = d{1,2} [ ":" d{2} [ ":" d{2} ] ] [ s* <time_suffix> ]
              <time_suffix> = ( "a" | "p" ) ( "m" | ".m." )
                       <us> = d{1,2} ( <divider> ) d{1,2} \\1 d{4}
                   <verbal> = <my> | <named_period> | <relative_period> | <month_day> | <full>  
@@ -440,7 +440,7 @@ App::JobLog::Command::info - provides general App::JobLog information
 
 =head1 VERSION
 
-version 1.014
+version 1.015
 
 =head1 SYNOPSIS
 

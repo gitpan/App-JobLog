@@ -1,6 +1,6 @@
 package App::JobLog::Command::today;
 BEGIN {
-  $App::JobLog::Command::today::VERSION = '1.014';
+  $App::JobLog::Command::today::VERSION = '1.015';
 }
 
 # ABSTRACT: show what has happened today
@@ -84,7 +84,7 @@ App::JobLog::Command::today - show what has happened today
 
 =head1 VERSION
 
-version 1.014
+version 1.015
 
 =head1 SYNOPSIS
 

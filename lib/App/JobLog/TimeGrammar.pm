@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 BEGIN {
-  $App::JobLog::TimeGrammar::VERSION = '1.014';
+  $App::JobLog::TimeGrammar::VERSION = '1.015';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -880,7 +880,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.014
+version 1.015
 
 =head1 SYNOPSIS
 
@@ -987,7 +987,7 @@ to facilitate finding them.
            <short_weekday> = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" 
             <span_divider> = s* ( "-"+ | ( "through" | "thru" | "to" | "til" [ "l" ] | "until" ) ) s*
                  <termini> = [ "the" s ] ( <beginning> | "end" )
-                    <time> = d{1,2} [ : d{2} [ : d{2} ] ] [ s* <time_suffix> ]
+                    <time> = d{1,2} [ ":" d{2} [ ":" d{2} ] ] [ s* <time_suffix> ]
              <time_suffix> = ( "a" | "p" ) ( "m" | ".m." )
                       <us> = d{1,2} ( <divider> ) d{1,2} \\1 d{4}
                   <verbal> = <my> | <named_period> | <relative_period> | <month_day> | <full>  
@@ -1000,7 +1000,7 @@ In general C<App::JobLog::TimeGrammar> will understand most time expressions you
 =head2 FUTURE
 
 B<TimeGrammar> does not generally understand the future. It understants C<this> and C<last> but not C<next>. It
-understands c<today> and C<yesterday> but not C<tomorrow>. This may change (in the future), but most tasks that
+understands C<today> and C<yesterday> but not C<tomorrow>. This may change (in the future), but most tasks that
 involve the log do not require explicit reference to the future, since all the events in the log are necessarily
 in the past. It would sometimes be useful to say a particular vacation date is C<tomorrow> or C<next month>, however.
 
