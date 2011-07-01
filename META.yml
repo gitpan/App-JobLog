@@ -40,4 +40,4 @@ requires:
   autouse: 0
   constant: 0
   overload: 0
-version: 1.016
+version: 1.017

@@ -1,6 +1,6 @@
 package App::JobLog::Command::tags;
 BEGIN {
-  $App::JobLog::Command::tags::VERSION = '1.016';
+  $App::JobLog::Command::tags::VERSION = '1.017';
 }
 
 # ABSTRACT: show what tags you have used
@@ -48,8 +48,10 @@ sub abstract {
 
 sub full_description {
     <<END
-List the tags used to categorize tasks in the log or in a specified range of dates. The date expressions
-understood are the same as those understood by the C<summary> command.
+List the tags used to categorize tasks in the log or in a specified range of dates. This allows one to
+explore the categorical structure of tasks.
+
+The date expressions understood are the same as those understood by the C<summary> command.
 END
 }
 
@@ -79,7 +81,7 @@ App::JobLog::Command::tags - show what tags you have used
 
 =head1 VERSION
 
-version 1.016
+version 1.017
 
 =head1 SYNOPSIS
 
@@ -96,7 +98,10 @@ version 1.016
 =head1 DESCRIPTION
 
 B<App::JobLog::Command::tags> lists the tags applied to tasks anywhere in the log or in a specified
-time range. The time expressions understood are the same as are understood by L<App::JobLog::Command::summary>.
+time range. This allows one to examine how tasks have been categorized (and perhaps how they have
+been mis-typed).
+
+The time expressions understood are the same as are understood by L<App::JobLog::Command::summary>.
 
 =head1 SEE ALSO
 
