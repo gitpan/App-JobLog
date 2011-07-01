@@ -1,6 +1,6 @@
 package App::JobLog::Command::today;
 BEGIN {
-  $App::JobLog::Command::today::VERSION = '1.015';
+  $App::JobLog::Command::today::VERSION = '1.016';
 }
 
 # ABSTRACT: show what has happened today
@@ -84,7 +84,7 @@ App::JobLog::Command::today - show what has happened today
 
 =head1 VERSION
 
-version 1.015
+version 1.016
 
 =head1 SYNOPSIS
 
@@ -144,7 +144,7 @@ incarnation of this application one obtained it by passing in the option C<-p> a
 
 =head1 SEE ALSO
 
-L<App::JobLog::Command::summary>, L<App::JobLog::Command::last>, L<App::JobLog::Command::configure>,
+L<App::JobLog::Command::summary>, L<App::JobLog::Command::last>, L<App::JobLog::Command::tags>, L<App::JobLog::Command::configure>,
 L<App::JobLog::Command::vacation>
 
 =head1 AUTHOR

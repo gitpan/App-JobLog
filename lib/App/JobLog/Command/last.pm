@@ -1,6 +1,6 @@
 package App::JobLog::Command::last;
 BEGIN {
-  $App::JobLog::Command::last::VERSION = '1.015';
+  $App::JobLog::Command::last::VERSION = '1.016';
 }
 
 # ABSTRACT: show details of last recorded event
@@ -43,7 +43,7 @@ App::JobLog::Command::last - show details of last recorded event
 
 =head1 VERSION
 
-version 1.015
+version 1.016
 
 =head1 SYNOPSIS
 
@@ -62,7 +62,7 @@ event will inherit, what task you would be resuming, and so forth.
 
 =head1 SEE ALSO
 
-L<App::JobLog::Command::summary>, L<App::JobLog::Command::today>, L<App::JobLog::Command::resume>,
+L<App::JobLog::Command::summary>, L<App::JobLog::Command::today>, L<App::JobLog::Command::resume>, L<App::JobLog::Command::tags>,
 L<App::JobLog::Command::modify>
 
 =head1 AUTHOR

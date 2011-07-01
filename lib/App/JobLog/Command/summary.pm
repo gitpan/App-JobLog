@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.015';
+  $App::JobLog::Command::summary::VERSION = '1.016';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -429,7 +429,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.015
+version 1.016
 
 =head1 SYNOPSIS
 
@@ -551,7 +551,7 @@ concerned with filtering events and formatting the report.
 
 =head1 SEE ALSO
 
-L<App::JobLog::Command::today>, L<App::JobLog::Command::last>, L<App::JobLog::Command::parse>, L<App::JobLog::TimeGrammar>
+L<App::JobLog::Command::today>, L<App::JobLog::Command::last>, L<App::JobLog::Command::parse>, L<App::JobLog::Command::tags>, L<App::JobLog::TimeGrammar>
 
 =head1 AUTHOR
 

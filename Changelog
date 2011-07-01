@@ -1,5 +1,9 @@
 Revision history for App::JobLog
 
+1.016     2011-06-30 22:30:45 America/New_York
+  * added tags command to list tags used in log
+  * fixed log tests so timezone peculiarities wouldn't prompt spurious failures
+
 1.015     2011-05-09 11:42:10 America/New_York
   * fixed --columns option of summary command
 

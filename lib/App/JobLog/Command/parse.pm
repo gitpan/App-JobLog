@@ -1,6 +1,6 @@
 package App::JobLog::Command::parse;
 BEGIN {
-  $App::JobLog::Command::parse::VERSION = '1.015';
+  $App::JobLog::Command::parse::VERSION = '1.016';
 }
 
 # ABSTRACT: parse a time expression
@@ -60,7 +60,7 @@ App::JobLog::Command::parse - parse a time expression
 
 =head1 VERSION
 
-version 1.015
+version 1.016
 
 =head1 DESCRIPTION
 

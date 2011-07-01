@@ -20,6 +20,10 @@ use Test::Fatal;
 my $dir = File::Temp->newdir();
 $ENV{ DIRECTORY() } = $dir;
 
+# use a constant time zone so as to avoid crafting data to fit various datelight savings time adjustments
+$App::JobLog::Config::tz =
+  DateTime::TimeZone->new( name => 'America/New_York' );
+
 subtest 'empty log' => sub {
     my $log = App::JobLog::Log->new;
     my $date =
