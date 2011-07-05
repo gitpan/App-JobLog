@@ -1,6 +1,6 @@
 package App::JobLog::Command::tags;
 BEGIN {
-  $App::JobLog::Command::tags::VERSION = '1.017';
+  $App::JobLog::Command::tags::VERSION = '1.018';
 }
 
 # ABSTRACT: show what tags you have used
@@ -81,7 +81,7 @@ App::JobLog::Command::tags - show what tags you have used
 
 =head1 VERSION
 
-version 1.017
+version 1.018
 
 =head1 SYNOPSIS
 

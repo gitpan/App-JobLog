@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 BEGIN {
-  $App::JobLog::TimeGrammar::VERSION = '1.017';
+  $App::JobLog::TimeGrammar::VERSION = '1.018';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -540,7 +540,7 @@ sub decontextualized_date {
             }
             when ('pay') {
                 my $days =
-                  $date->subtract_datetime(start_pay_period)->in_units('days');
+                  $date->delta_days(start_pay_period)->in_units('days');
                 $days %= pay_period_length;
                 $date->subtract( days => $days );
                 $date->add( days => pay_period_length ) unless $is_start;
@@ -647,8 +647,7 @@ sub fix_date {
                     }
                     when ('pay') {
                         my $days =
-                          $date->subtract_datetime(start_pay_period)
-                          ->in_units('days');
+                          $date->delta_days(start_pay_period)->in_units('days');
                         $days %= pay_period_length;
                         $date->subtract( days => $days );
                         $date->add( days => pay_period_length )
@@ -692,8 +691,7 @@ sub fix_date {
                     }
                     when ('pay') {
                         my $days =
-                          $date->subtract_datetime(start_pay_period)
-                          ->in_units('days');
+                          $date->delta_days(start_pay_period)->in_units('days');
                         $days %= pay_period_length;
                         $date->subtract( days => $days );
                         if ($is_start) {
@@ -880,7 +878,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.017
+version 1.018
 
 =head1 SYNOPSIS
 

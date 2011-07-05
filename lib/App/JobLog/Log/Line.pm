@@ -1,6 +1,6 @@
 package App::JobLog::Log::Line;
 BEGIN {
-  $App::JobLog::Log::Line::VERSION = '1.017';
+  $App::JobLog::Log::Line::VERSION = '1.018';
 }
 
 # ABSTRACT: encapsulates one line of log text
@@ -302,7 +302,7 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.017
+version 1.018
 
 =head1 DESCRIPTION
 

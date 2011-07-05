@@ -1,6 +1,6 @@
 package App::JobLog::Log;
 BEGIN {
-  $App::JobLog::Log::VERSION = '1.017';
+  $App::JobLog::Log::VERSION = '1.018';
 }
 
 # ABSTRACT: the code that lets us interact with the log
@@ -524,7 +524,7 @@ App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.017
+version 1.018
 
 =head1 DESCRIPTION
 
