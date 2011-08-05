@@ -21,7 +21,10 @@ lib/App/JobLog/Command/resume.pm
 lib/App/JobLog/Command/summary.pm
 lib/App/JobLog/Command/tags.pm
 lib/App/JobLog/Command/today.pm
+lib/App/JobLog/Command/truncate.pm
+lib/App/JobLog/Command/truncate.pm.bak
 lib/App/JobLog/Command/vacation.pm
+lib/App/JobLog/Command/when.pm
 lib/App/JobLog/Config.pm
 lib/App/JobLog/Log.pm
 lib/App/JobLog/Log/Day.pm

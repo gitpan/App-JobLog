@@ -1,6 +1,6 @@
 package App::JobLog;
 BEGIN {
-  $App::JobLog::VERSION = '1.018';
+  $App::JobLog::VERSION = '1.019';
 }
 use App::Cmd::Setup -app;
 
@@ -20,7 +20,7 @@ App::JobLog - base of work log application
 
 =head1 VERSION
 
-version 1.018
+version 1.019
 
 =head1 SYNOPSIS
 
@@ -43,6 +43,7 @@ version 1.018
         tags: list tags employed in log or some subrange thereof
        today: what has happened today
     vacation: list or define days off
+        when: report when work is done for the day
 
  houghton@NorthernSpy:~$ job summary this week
  Sunday, 27 February, 2011
@@ -218,6 +219,12 @@ Summarizes everything done today. See L<App::JobLog::Command::today>.
 
 Allows viewing and modification of a simple database of vacation times kept separately from the log.
 See L<App::JobLog::Command::vacation>.
+
+=item L<when|App::JobLog::Command::when>
+
+Reports when you'll have worked the expected number of hours given how many hours you put in in the
+specified period (the same day, by default).
+See L<App::JobLog::Command::when>.
 
 =back
 

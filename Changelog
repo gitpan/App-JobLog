@@ -1,5 +1,10 @@
 Revision history for App::JobLog
 
+1.019     2011-08-05 10:53:20 America/New_York
+  * fixed error in description of vacation command options
+  * refactored "when done" functionality in "when" command and added task filtering options
+  * added mention of when command to App::JobLog pod
+
 1.018     2011-07-05 09:15:01 America/New_York
   * fixed pay period arithmetic; s/subtract_datetime/delta_days/g
 

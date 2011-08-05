@@ -1,6 +1,6 @@
 package App::JobLog::Command::vacation;
 BEGIN {
-  $App::JobLog::Command::vacation::VERSION = '1.018';
+  $App::JobLog::Command::vacation::VERSION = '1.019';
 }
 
 # ABSTRACT: controller for vacation dates
@@ -106,7 +106,7 @@ sub options {
                     [ 'add|a=s', 'add date or range; e.g., -a "May 17, 1951"' ],
                     [
                         'remove|r=i',
-'remove period with given index from list (see --list); e.g., -d 1'
+'remove period with given index from list (see --list); e.g., -r 1'
                     ],
                 ]
             }
@@ -146,7 +146,7 @@ App::JobLog::Command::vacation - controller for vacation dates
 
 =head1 VERSION
 
-version 1.018
+version 1.019
 
 =head1 SYNOPSIS
 

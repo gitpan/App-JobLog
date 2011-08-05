@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 BEGIN {
-  $App::JobLog::Command::summary::VERSION = '1.018';
+  $App::JobLog::Command::summary::VERSION = '1.019';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -165,9 +165,6 @@ END
             }
         }
     }
-    my $t = 0;
-    $t += $_->time_remaining for @$days;
-    return $t;
 }
 
 # Construct a test from the tags, excluded-tags, match, no-match, and time options.
@@ -429,7 +426,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.018
+version 1.019
 
 =head1 SYNOPSIS
 

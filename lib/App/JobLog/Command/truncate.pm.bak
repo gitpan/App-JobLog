@@ -1,9 +1,6 @@
-package App::JobLog::Command::parse;
-BEGIN {
-  $App::JobLog::Command::parse::VERSION = '1.019';
-}
+package App::JobLog::Command::truncate;
 
-# ABSTRACT: parse a time expression
+# ABSTRACT: decapitate the log
 
 use App::JobLog -command;
 use autouse 'App::JobLog::TimeGrammar' => qw(parse);
@@ -13,17 +10,15 @@ use Modern::Perl;
 sub execute {
     my ( $self, $opt, $args ) = @_;
     my $expression = join ' ', @$args;
+    my ($s, $is_interval);
     eval {
-        my ( $s, $e, $is_interval ) = parse $expression;
-        say <<END;
-        
-received:          $expression
-start time:        $s
-end time:          $e
-received interval: @{[$is_interval ? 'true' : 'false']}
-END
+        ( $s, undef, $is_interval ) = parse $expression;
     };
     $self->usage_error($@) if $@;
+        $self->usage_error('truncation date must not be a interval')
+          if $is_interval;
+
+    # truncate
 }
 
 sub validate {
@@ -33,7 +28,9 @@ sub validate {
 
 sub usage_desc { '%c ' . __PACKAGE__->name }
 
-sub abstract { 'parse a time expression' }
+sub abstract {
+    'Truncate the log to contain only those moments after a given date.';
+}
 
 sub full_description {
     <<END
@@ -50,17 +47,9 @@ END
 
 1;
 
-
+__END__
 
 =pod
-
-=head1 NAME
-
-App::JobLog::Command::parse - parse a time expression
-
-=head1 VERSION
-
-version 1.019
 
 =head1 DESCRIPTION
 
@@ -77,19 +66,4 @@ purposes.
 
 L<App::JobLog::TimeGrammar>
 
-=head1 AUTHOR
-
-David F. Houghton <dfhoughton@gmail.com>
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2011 by David F. Houghton.
-
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
-
 =cut
-
-
-__END__
-
