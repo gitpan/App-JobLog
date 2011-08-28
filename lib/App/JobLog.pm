@@ -1,6 +1,6 @@
 package App::JobLog;
-BEGIN {
-  $App::JobLog::VERSION = '1.019';
+{
+  $App::JobLog::VERSION = '1.020';
 }
 use App::Cmd::Setup -app;
 
@@ -20,7 +20,7 @@ App::JobLog - base of work log application
 
 =head1 VERSION
 
-version 1.019
+version 1.020
 
 =head1 SYNOPSIS
 
@@ -42,6 +42,7 @@ version 1.019
      summary: list tasks with certain properties in a particular time range
         tags: list tags employed in log or some subrange thereof
        today: what has happened today
+    truncate: shorten the log to contain only those moments after a given date
     vacation: list or define days off
         when: report when work is done for the day
 
@@ -67,13 +68,13 @@ version 1.019
  houghton@NorthernSpy:~$ job add --clear-tags messing around
  houghton@NorthernSpy:~$ job a messing around some more
  houghton@NorthernSpy:~$ job done
- houghton@NorthernSpy:~$ job t
+ houghton@NorthernSpy:~$ job to
  Sunday,  6 March, 2011
    9:02 - 9:03 am  0.01  messing around; messing around some more                                                                                            
  
    TOTAL HOURS 0.01
  houghton@NorthernSpy:~$ job resume
- houghton@NorthernSpy:~$ job t
+ houghton@NorthernSpy:~$ job to
  Sunday,  6 March, 2011
       9:02 - 9:03 am  0.01  messing around; messing around some more                                                                                            
    9:03 am - ongoing  0.00  messing around some more                                                                                                            
@@ -92,14 +93,14 @@ version 1.019
  workdays                        MTWHF
  houghton@NorthernSpy:~$ job conf --precision 1
  precision set to 1
- houghton@NorthernSpy:~$ job t
+ houghton@NorthernSpy:~$ job to
  Sunday,  6 March, 2011
       9:02 - 9:03 am  0.0  messing around; messing around some more                                                                                            
    9:03 am - ongoing  0.0  messing around some more                                                                                                            
  
    TOTAL HOURS 0.0
  houghton@NorthernSpy:~$ job d
- houghton@NorthernSpy:~$ job t
+ houghton@NorthernSpy:~$ job to
  Sunday,  6 March, 2011
    9:02 - 9:03 am  0.0  messing around; messing around some more                                                                                            
    9:03 - 9:06 am  0.0  messing around some more                                                                                                            
@@ -139,8 +140,7 @@ worry about character encoding so the log has to be in Unicode (utf8).
 
 B<App::JobLog> keeps its documents, by default, in a hidden directory in your home directory called F<.joblog/>. These
 documents are a README file explaining to anyone who stumbles across the directory what it's function is, a log, called
-F<log>, a configuration file, called F<config.ini>, a vacation file, called F<vacation>, and perhaps a backup of the
-log called F<log.bak>.
+F<log>, a configuration file, called F<config.ini>, a vacation file, called F<vacation>, and perhaps log backups.
 
 To perform any action with B<App::JobLog> one invokes the executable with a command and a list of options. These commands
 are listed below.
@@ -214,6 +214,10 @@ List only the tags used to categorize tasks. See L<App::JobLog::Command::tags>.
 =item L<today|App::JobLog::Command::today>
 
 Summarizes everything done today. See L<App::JobLog::Command::today>.
+
+=item L<truncate|App::JobLog::Command::truncate>
+
+Pares off and stores the older portion of the log. See L<App::JobLog::Command::truncate>.
 
 =item L<vacation|App::JobLog::Command::vacation>
 

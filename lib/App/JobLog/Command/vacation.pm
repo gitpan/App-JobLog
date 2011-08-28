@@ -1,6 +1,6 @@
 package App::JobLog::Command::vacation;
-BEGIN {
-  $App::JobLog::Command::vacation::VERSION = '1.019';
+{
+  $App::JobLog::Command::vacation::VERSION = '1.020';
 }
 
 # ABSTRACT: controller for vacation dates
@@ -146,7 +146,7 @@ App::JobLog::Command::vacation - controller for vacation dates
 
 =head1 VERSION
 
-version 1.019
+version 1.020
 
 =head1 SYNOPSIS
 

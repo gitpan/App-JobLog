@@ -1,15 +1,18 @@
 package App::JobLog::Command::truncate;
-BEGIN {
-  $App::JobLog::Command::truncate::VERSION = '1.019';
+{
+  $App::JobLog::Command::truncate::VERSION = '1.020';
 }
 
 # ABSTRACT: decapitate the log
 
+
 use App::JobLog -command;
 use autouse 'App::JobLog::TimeGrammar' => qw(parse);
-use Class::Autouse qw(IO::File App::JobLog::Log);
+use Class::Autouse
+  qw(IO::File App::JobLog::Log App::JobLog::Log::Line File::Temp File::Spec);
 use autouse 'App::JobLog::Time'   => qw(now);
-use autouse 'App::JobLog::Config' => qw(log);
+use autouse 'App::JobLog::Config' => qw(log dir);
+use autouse 'File::Copy'          => qw(move);
 
 use Modern::Perl;
 
@@ -24,30 +27,74 @@ sub execute {
 
     # determine name of head log
     my $log = App::JobLog::Log->new;
-    my $p   = $log->find_previous($s);
+    my ($p) = $log->find_previous($s);
     $self->usage("no event in log prior to $expression") unless $p;
-    my $e    = $log->first_event;
-    my $base = 'log-' . $e->ymd . '--'$p->ymd;
-    # create output handle for head log
-    my $io   = $opt->compression
-      ? _pick_compression( $opt->compression ) :: 'IO::File';
-    given ($io) {
-        when ('IO::File')            { }
-        when ('IO::Compress::Zip')   { }
-        when ('IO::Compress::Gzip')  { }
-        when ('IO::Compress::Bzip2') { }
-        when ('IO::Compress::Lzma')  { }
-        default { die "unprepared to handle $io; please report bug"}
-    }
+    my ($e) = $log->first_event;
+    my $base = 'log-' . $e->start->ymd . '--' . $p->start->ymd;
 
-    # create backup log
-    # iterate over events in log, appending old ones to new handle
-    # append done event if necessary
-    $io->close;
-    # create  temp file
-    # append start line if necessary
-    # append remaining lines to new log
-    # move old to new
+    # create output handle for head log
+    my $io =
+      $opt->compression ? _pick_compression( $opt->compression ) : 'IO::File';
+    my $suffix = '';
+    my @args   = ();
+    given ($io) {
+        when ('IO::File') { push @args, 'w' }
+        when ('IO::Compress::Zip') {
+            $suffix = '.zip';
+            push @args, Name => $base;
+        }
+        when ('IO::Compress::Gzip')  { $suffix = '.gz' }
+        when ('IO::Compress::Bzip2') { $suffix = '.bz2' }
+        when ('IO::Compress::Lzma')  { $suffix = '.lzma' }
+        default { die "unprepared to handle $io; please report bug" }
+    }
+    my $old_f = File::Spec->catfile( dir, $base . $suffix );
+    my $old_fh     = $io->new( $old_f, @args );
+    my $fh         = File::Temp->new;
+    my $current_fh = $old_fh;
+    my $log_handle = IO::File->new( log, 'r' );
+    my ( $unswitched, @buffer, $previous ) = (1);
+    while ( defined( my $line = $log_handle->getline ) ) {
+        my $ll = App::JobLog::Log::Line->parse($line);
+        if ( $ll->is_event ) {
+            if ($unswitched) {
+                $previous = $ll if $ll->is_beginning;
+                if ( $ll->time > $s ) {
+                    if ($previous) {    # event spanning border
+                        my $end_time = $s->clone->subtract( seconds => 1 );
+                        $current_fh->print(
+                            App::JobLog::Log::Line->new(
+                                done => 1,
+                                time => $end_time
+                            )
+                        );
+                        $previous->time = $s;
+                        $line = $previous->to_string . "\n";
+                    }
+                    $current_fh->close;
+                    $current_fh = $fh;
+                    _header( $base, $suffix, \@buffer );
+                    $unswitched = undef;
+                }
+                elsif ( $ll->is_end ) {
+                    $previous = undef;
+                }
+            }
+            while (@buffer) {
+                $current_fh->print( shift @buffer );
+            }
+            $current_fh->print($line);
+        }
+        else {
+            push @buffer, $line;
+        }
+    }
+    while (@buffer) {
+        $current_fh->print( shift @buffer );
+    }
+    $current_fh->close;
+    move( "$fh", log );
+    print "truncated portion of log saved in $old_f\n";
 }
 
 sub validate {
@@ -55,17 +102,18 @@ sub validate {
     $self->usage_error('no time expression provided') unless @$args;
     if ( $opt->compression ) {
         my $alg = _pick_compression( $opt->compression );
-        eval { require $alg };
-        $self->usage(
-"you must install $alg to use compression option --$opt->compression"
-        ) if $@;
+        eval "require $alg";
+        $self->usage_error(
+            "$@: you must install $alg to use compression option --"
+              . $opt->compression )
+          if $@;
     }
 }
 
 sub usage_desc { '%c ' . __PACKAGE__->name }
 
 sub abstract {
-    'Truncate the log to contain only those moments after a given date.';
+    'shorten the log to contain only those moments after a given date';
 }
 
 sub options {
@@ -85,18 +133,26 @@ sub options {
 
 sub full_description {
     <<END
-If you are getting strange results with @{[App::JobLog::Command::summary->name]}, the problem
-might be the time expression you're using. This command lets you see how your expression is
-getting parsed.
-
-It repeats to you the phrase it has parsed, prints out the start and end time of the corresponding
-interval, and finally, whether it understands itself to have received an expression of the form
-<date> or <date> <separator> <date>, the latter form being called an "interval" for diagnostic
-purposes.
+Over time your log will fill with cruft: work no one is interested in any longer,
+tags whose meaning you've forgotten. What you want to do at this point is chop off
+all the old stuff, stash it somewhere you can find it if need be, and retain in
+your active log only the more recent events. This is what truncate is for. You give
+it a starting date and it splits your log into two with the active portion containing
+all moments on that date or after. The older portion is retained in your joblog hidden
+directory.
 END
 }
 
-1;
+# comment header added to truncated log
+sub _header {
+    my ( $base, $suffix, $buffer ) = @_;
+    unshift @$buffer,
+      map { App::JobLog::Log::Line->new( comment => "$_\n" ) }
+      <<END =~ /.*\S/mg; #<--- Global symbol "$base" requires explicit package name at (eval 1853) line 9.
+Log file truncated on @{[now]}.
+Head of log to be found in $base$suffix
+END
+}
 
 # converts chosen compression opt into appropriate IO:: algorithm
 sub _pick_compression {
@@ -107,6 +163,9 @@ sub _pick_compression {
         when ('bzip2') { return 'IO::Compress::Bzip2' }
         when ('lzma')  { return 'IO::Compress::Lzma' }
     }
+}
+
+1;
 
 
 
@@ -118,22 +177,45 @@ App::JobLog::Command::truncate - decapitate the log
 
 =head1 VERSION
 
-version 1.019
+version 1.020
+
+=head1 SYNOPSIS
+
+ houghton@NorthernSpy:~$ job truncate -z 2010
+ truncated portion of log saved in /home/houghton/.joblog/log-2009-01-12--2009-12-29.zip
+ houghton@NorthernSpy:~$ unzip -l /home/houghton/.joblog/log-2009-01-12--2009-12-29.zip
+ Archive:  /home/houghton/.joblog/log-2009-01-12--2009-12-29.zip
+   Length      Date    Time    Name
+ ---------  ---------- -----   ----
+     56342  2011-08-28 16:07   log-2009-01-12--2009-12-29
+ ---------                     -------
+     56342                     1 file
+ houghton@NorthernSpy:~$ head /home/houghton/.joblog/log
+ # Log file truncated on 2011-08-28T16:07:35.
+ # Head of log to be found in log-2009-01-12--2009-12-29.zip
+ # 2010/01/01
+ 2010  1  1  0  0  0:Complyon:adding features to segmenter
+ # 2010/01/02
+ 2010  1  1 16 40 45:DONE
+ 2010  1  2 14 12 19:Complyon:creating accuracy measurement rig
+ 2010  1  2 14 41  9:DONE
+ 2010  1  2 14 44  5:Complyon:creating accuracy measurement rig
+ # 2010/01/03
+ houghton@NorthernSpy:~$ 
 
 =head1 DESCRIPTION
 
-If you are getting strange results with summary, the problem
-might be the time expression you're using. This command lets you see how your expression is
-getting parsed.
-
-It repeats to you the phrase it has parsed, prints out the start and end time of the corresponding
-interval, and finally, whether it understands itself to have received an expression of the form
-<date> or <date> <separator> <date>, the latter form being called an "interval" for diagnostic
-purposes.
+Over time your log will fill with cruft: work no one is interested in any longer,
+tags whose meaning you've forgotten. What you want to do at this point is chop off
+all the old stuff, stash it somewhere you can find it if need be, and retain in
+your active log only the more recent events. This is what truncate is for. You give
+it a starting date and it splits your log into two with the active portion containing
+all moments on that date or after. The older portion is retained in your joblog hidden
+directory.
 
 =head1 SEE ALSO
 
-L<App::JobLog::TimeGrammar>
+L<App::JobLog::Command::edit>
 
 =head1 AUTHOR
 

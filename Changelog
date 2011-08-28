@@ -1,5 +1,10 @@
 Revision history for App::JobLog
 
+1.020     2011-08-28 17:51:12 America/New_York
+  * fixed yet another documentation error in App::JobLog pod
+  * finished truncate command
+  * added missing Term::ReadKey dependency
+
 1.019     2011-08-05 10:53:20 America/New_York
   * fixed error in description of vacation command options
   * refactored "when done" functionality in "when" command and added task filtering options

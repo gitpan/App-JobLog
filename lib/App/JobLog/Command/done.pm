@@ -1,6 +1,6 @@
 package App::JobLog::Command::done;
-BEGIN {
-  $App::JobLog::Command::done::VERSION = '1.019';
+{
+  $App::JobLog::Command::done::VERSION = '1.020';
 }
 
 # ABSTRACT: close last open event
@@ -38,7 +38,7 @@ App::JobLog::Command::done - close last open event
 
 =head1 VERSION
 
-version 1.019
+version 1.020
 
 =head1 SYNOPSIS
 
