@@ -3,6 +3,7 @@
 use 5.006;
 use strict;
 use warnings;
+use autodie;
 
 use File::Temp ();
 use App::JobLog::Config qw(log DIRECTORY);
@@ -12,6 +13,7 @@ use App::JobLog::Time qw(tz);
 use DateTime;
 use File::Spec;
 use IO::All -utf8;
+use FileHandle;
 
 use Test::More;
 use Test::Fatal;
@@ -107,7 +109,6 @@ for my $size (qw(tiny small normal big)) {
         }
     }
 
-    # test log
     subtest "$size log" => sub {
         my $log = App::JobLog::Log->new;
         my ($e) = $log->first_event;
@@ -153,5 +154,40 @@ for my $size (qw(tiny small normal big)) {
         }
     };
 }
+
+subtest 'iterating over events in reverse' => sub {
+
+    # copy log data over
+    my $file = File::Spec->catfile( 't', 'data', 'tiny.log' );
+    my $io = io $file;
+    $io > io log;
+
+    # count events
+    my $fh     = FileHandle->new($file);
+    my @events = <$fh>;
+    @events = map { /^\d/ && $_ !~ /DONE/ ? $_ : () } @events;
+    my $log   = App::JobLog::Log->new;
+    my $count = 0;
+    my $i     = $log->reverse_iterator;
+    my @reversed_events;
+    while ( my $e = $i->() ) { push @reversed_events, $e }
+    ok( @events == @reversed_events, 'found all events' );
+
+    # see if the log returns the same events in either order
+    @events = reverse @{ $log->all_events };
+    for ( $i = 0 ; $i < @events && $i < @reversed_events ; $i++ ) {
+        my ( $e1, $e2 ) = ( $events[$i], $reversed_events[$i] );
+        ok( $e1->cmp($e2) == 0, "same time for event $i" );
+    }
+
+    # see if we can iterate from an event midway in the log
+    for my $index ( 0 .. $#events ) {
+        $count = 0;
+        $i     = $log->reverse_iterator( $events[$index] );
+        while ( $i->() ) { $count++ }
+        ok( $count == @events - $index,
+            "found correct number of events iterating from event $index" );
+    }
+};
 
 done_testing();

@@ -1,6 +1,6 @@
 package App::JobLog::Command::add;
 {
-  $App::JobLog::Command::add::VERSION = '1.020';
+  $App::JobLog::Command::add::VERSION = '1.021';
 }
 
 # ABSTRACT: log an event
@@ -88,7 +88,7 @@ App::JobLog::Command::add - log an event
 
 =head1 VERSION
 
-version 1.020
+version 1.021
 
 =head1 SYNOPSIS
 

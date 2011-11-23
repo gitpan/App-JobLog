@@ -1,6 +1,6 @@
 package App::JobLog::Log;
 {
-  $App::JobLog::Log::VERSION = '1.020';
+  $App::JobLog::Log::VERSION = '1.021';
 }
 
 # ABSTRACT: the code that lets us interact with the log
@@ -173,6 +173,49 @@ sub last_event {
     $self->[LAST_EVENT] = $e;
     $self->[LAST_INDEX] = $i;
     return $e, $i;
+}
+
+
+sub reverse_iterator {
+    my ( $self, $event ) = @_;
+    if ( ref $event ) {
+        if ( $event->isa('DateTime') ) {
+            my $events =
+              $self->find_events( $event, $self->first_event->start );
+            if (@$events) {
+                $event = $events->[$#$events];
+            }
+            else {
+                $event = undef;
+            }
+        }
+    }
+    else {
+        ($event) = $self->last_event;
+    }
+    return sub { }
+      unless $event;
+    my ( undef, $index, $io ) =
+      ( $self->find_previous( $event->start ), $self->[IO] );
+    return sub {
+        return undef unless $event;
+        my $e        = $event;
+        my $end_time = $event->start;
+        $event = undef;
+        while ( --$index >= 0 ) {
+            my $line = $io->[$index];
+            my $ll   = App::JobLog::Log::Line->parse($line);
+            if ( $ll->is_beginning ) {
+                $event = App::JobLog::Log::Event->new($ll);
+                $event->end = $end_time;
+                last;
+            }
+            elsif ( $ll->is_end ) {
+                $end_time = $ll->time;
+            }
+        }
+        return $e;
+    };
 }
 
 
@@ -524,7 +567,7 @@ App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.020
+version 1.021
 
 =head1 DESCRIPTION
 
@@ -564,6 +607,16 @@ of its line. Its return object is an L<App::JobLog::Log::Event>.
 
 C<last_event> returns the last event in the log and the index
 of its line. Its return object is an L<App::JobLog::Log::Event>.
+
+=head2 reverse_iterator
+
+C<reverse_iterator> returns a closure that allows you to iterate
+over the events in the log in reverse. Every time you call the closure
+it returns the next unvisited event.
+
+If you pass this method an optional argument, either a L<DateTime> or a 
+L<App::JobLog::Log::Event>, it will iterate from the event beginning at or
+after this event or time.
 
 =head2 find_events
 

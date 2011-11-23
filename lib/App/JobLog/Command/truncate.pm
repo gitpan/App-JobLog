@@ -1,6 +1,6 @@
 package App::JobLog::Command::truncate;
 {
-  $App::JobLog::Command::truncate::VERSION = '1.020';
+  $App::JobLog::Command::truncate::VERSION = '1.021';
 }
 
 # ABSTRACT: decapitate the log
@@ -110,7 +110,9 @@ sub validate {
     }
 }
 
-sub usage_desc { '%c ' . __PACKAGE__->name }
+sub usage_desc {
+    '%c ' . __PACKAGE__->name . ' %o <date>';
+}
 
 sub abstract {
     'shorten the log to contain only those moments after a given date';
@@ -177,7 +179,7 @@ App::JobLog::Command::truncate - decapitate the log
 
 =head1 VERSION
 
-version 1.020
+version 1.021
 
 =head1 SYNOPSIS
 

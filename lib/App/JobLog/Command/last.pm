@@ -1,6 +1,6 @@
 package App::JobLog::Command::last;
 {
-  $App::JobLog::Command::last::VERSION = '1.020';
+  $App::JobLog::Command::last::VERSION = '1.021';
 }
 
 # ABSTRACT: show details of last recorded event
@@ -15,21 +15,68 @@ use Class::Autouse qw(
 sub execute {
     my ( $self, $opt, $args ) = @_;
 
-    my ($e) = App::JobLog::Log->new->last_event;
+    # construct event test
+    my %must   = map { $_ => 1 } @{ $opt->tag     || [] };
+    my %mustnt = map { $_ => 1 } @{ $opt->without || [] };
+    my $test   = sub {
+        my $event = shift;
+        my $good  = 1;
+        if (%must) {
+            $good = 0;
+            for my $tag ( @{ $event->tags } ) {
+                if ( $must{$tag} ) {
+                    $good = 1;
+                    last;
+                }
+            }
+        }
+        if ( $good && %mustnt ) {
+            for my $tag ( @{ $event->tags } ) {
+                if ( $mustnt{$tag} ) {
+                    $good = 0;
+                    last;
+                }
+            }
+        }
+        return $good;
+    };
+
+    # find event
+    my ( $i, $count, $e ) = ( App::JobLog::Log->new->reverse_iterator, 0 );
+    while ( $e = $i->() ) {
+        $count++;
+        last if $test->($e);
+    }
+
     if ($e) {
         my $start = $e->start->strftime('%F at %H:%M:%S %p');
         my $end = $e->is_open ? 'now' : $e->end->strftime('%F at %H:%M:%S %p');
         $opt->{merge} = 'no_merge';
-        'App::JobLog::Command::summary'->execute( $opt, ["$start - $end"] );
+        App::JobLog::Command::summary->execute( $opt, ["$start - $end"] );
     }
     else {
-        say 'empty log';
+        say $count ? 'no matching event' : 'empty log';
     }
 }
 
 sub usage_desc { '%c ' . __PACKAGE__->name }
 
 sub abstract { 'describe the last task recorded' }
+
+sub options {
+    return (
+        [
+            'tag|t=s@',
+            'find the last event with one of these tags; '
+              . 'multiple tags may be specified'
+        ],
+        [
+            'without|w=s@',
+            'find the last event which does not have any of these tags; '
+              . 'multiple tags may be specified'
+        ],
+    );
+}
 
 1;
 
@@ -43,7 +90,7 @@ App::JobLog::Command::last - show details of last recorded event
 
 =head1 VERSION
 
-version 1.020
+version 1.021
 
 =head1 SYNOPSIS
 
@@ -56,9 +103,12 @@ version 1.020
 
 =head1 DESCRIPTION
 
-B<App::JobLog::Command::last> simply tells you the last event in the log. This is useful if you
-want to know whether you ever punched out, for example, or if you want to know what tags a new
-event will inherit, what task you would be resuming, and so forth.
+Without options specified B<App::JobLog::Command::last> simply tells you the last event in the log. 
+This is useful if you want to know whether you ever punched out, for example, or if you want to know 
+what tags a new event will inherit, what task you would be resuming, and so forth.
+
+You may specify tags or tags to avoid, in which case B<last> will describe the last event matching
+this restriction.
 
 =head1 SEE ALSO
 

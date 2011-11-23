@@ -17,7 +17,7 @@ my %WriteMakefileArgs = (
     "String::Random" => 0,
     "Test::Fatal" => 0,
     "Test::More" => 0,
-    "perl" => "5.006",
+    "autodie" => 0,
     "strict" => 0,
     "warnings" => 0
   },
@@ -53,7 +53,7 @@ my %WriteMakefileArgs = (
     "constant" => 0,
     "overload" => 0
   },
-  "VERSION" => "1.020",
+  "VERSION" => "1.021",
   "test" => {
     "TESTS" => "t/*.t"
   }

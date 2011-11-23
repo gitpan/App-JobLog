@@ -1,5 +1,12 @@
 Revision history for App::JobLog
 
+1.021     2011-11-23 06:15:30 EST5EDT
+  * improved help doc for truncate command
+  * removed incorrect examples from configure command help
+  * added reverse_iterator method to App::JobLog::Log to facilitate iterating
+    over events in reverse chronological order
+  * added tag restriction options for resume and last commands
+
 1.020     2011-08-28 17:51:12 America/New_York
   * fixed yet another documentation error in App::JobLog pod
   * finished truncate command

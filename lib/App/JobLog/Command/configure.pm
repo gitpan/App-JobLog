@@ -1,6 +1,6 @@
 package App::JobLog::Command::configure;
 {
-  $App::JobLog::Command::configure::VERSION = '1.020';
+  $App::JobLog::Command::configure::VERSION = '1.021';
 }
 
 # ABSTRACT: examine or modify App::JobLog configuration
@@ -132,13 +132,13 @@ sub options {
         ],
         [
             'length-pay-period=i',
-            'the length of the pay period in days; e.g., --pp-length= 7; '
+            'the length of the pay period in days; e.g., --length-pay-period 7; '
               . 'default is '
               . PERIOD
         ],
         [
             'day-length=f',
-            'length of workday; ' . 'e.g., -d 7.5; ' . 'default is ' . HOURS
+            'length of workday; ' . 'e.g., --day-length 7.5; ' . 'default is: ' . HOURS
         ],
         [
             'workdays=s',
@@ -271,7 +271,7 @@ App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.020
+version 1.021
 
 =head1 SYNOPSIS
 

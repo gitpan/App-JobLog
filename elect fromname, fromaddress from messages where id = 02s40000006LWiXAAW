@@ -1,0 +1,26 @@
+                                      Table "public.messages"
+   Column    |            Type             |                       Modifiers                       
+-------------+-----------------------------+-------------------------------------------------------
+ id          | character(18)               | not null
+ parentid    | character(18)               | not null
+ createdbyid | character(18)               | not null
+ activityid  | character(18)               | not null
+ textbody    | character varying(32000)    | 
+ subject     | character varying(400)      | 
+ fromname    | character varying(128)      | 
+ fromaddress | character varying(128)      | 
+ toaddress   | character varying(1024)     | 
+ status      | numeric(1,0)                | 
+ messagedate | timestamp without time zone | 
+ number      | integer                     | 
+ flag        | numeric(1,0)                | default 0
+ int_id      | integer                     | not null default nextval('messages_serial'::regclass)
+ notes       | character varying(1024)     | 
+Indexes:
+    "messages_pkey" PRIMARY KEY, btree (int_id)
+    "messages_id_idx" UNIQUE, btree (id)
+    "activityid" btree (activityid)
+    "createdbyid" btree (createdbyid)
+    "parentid" btree (parentid)
+    "splunk_number_idx" btree (number)
+

@@ -1,6 +1,6 @@
 package App::JobLog::Command::resume;
 {
-  $App::JobLog::Command::resume::VERSION = '1.020';
+  $App::JobLog::Command::resume::VERSION = '1.021';
 }
 
 # ABSTRACT: resume last closed task
@@ -13,10 +13,43 @@ use autouse 'App::JobLog::Time' => qw(now);
 sub execute {
     my ( $self, $opt, $args ) = @_;
 
+    # construct event test
+    my %must   = map { $_ => 1 } @{ $opt->tag     || [] };
+    my %mustnt = map { $_ => 1 } @{ $opt->without || [] };
+    my $test   = sub {
+        my $event = shift;
+        my $good  = 1;
+        if (%must) {
+            $good = 0;
+            for my $tag ( @{ $event->tags } ) {
+                if ( $must{$tag} ) {
+                    $good = 1;
+                    last;
+                }
+            }
+        }
+        if ( $good && %mustnt ) {
+            for my $tag ( @{ $event->tags } ) {
+                if ( $mustnt{$tag} ) {
+                    $good = 0;
+                    last;
+                }
+            }
+        }
+        return $good;
+    };
+
+    # find event
     my $log = App::JobLog::Log->new;
-    my ($e) = $log->last_event;
-    $self->usage_error('empty log') unless $e;
-    $self->usage_error('last event ongoing') unless $e->is_closed;
+    my ( $i, $count, $e ) = ( $log->reverse_iterator, 0 );
+    while ( $e = $i->() ) {
+        $count++;
+        last if $test->($e);
+    }
+
+    $self->usage_error('empty log')         unless $count;
+    $self->usage_error('no matching event') unless $e;
+    $self->usage_error('event ongoing')     unless $e->is_closed;
 
     my $ll = $e->data->clone;
     $ll->time = now;
@@ -25,13 +58,29 @@ sub execute {
 
 sub usage_desc { '%c ' . __PACKAGE__->name . ' %o' }
 
-sub abstract { 'resume last closed task' }
+sub abstract { 'resume last task' }
 
 sub full_description {
     <<END
 Starts a new task with an identical description and tags to the last
-task closed.
+task in the log. If some restriction by tag is specified, it is the last
+task with the given tags.
 END
+}
+
+sub options {
+    return (
+        [
+            'tag|t=s@',
+            'resume the last event with one of these tags; '
+              . 'multiple tags may be specified'
+        ],
+        [
+            'without|w=s@',
+            'resume the last event which does not have any of these tags; '
+              . 'multiple tags may be specified'
+        ],
+    );
 }
 
 1;
@@ -46,7 +95,7 @@ App::JobLog::Command::resume - resume last closed task
 
 =head1 VERSION
 
-version 1.020
+version 1.021
 
 =head1 SYNOPSIS
 
@@ -68,8 +117,11 @@ version 1.020
 
 =head1 DESCRIPTION
 
-B<App::JobLog::Command::resume> lets you begin a new event identical in tags and description to
-the last one. If the most recent task is ongoing an error message is emitted.
+Without options specified B<App::JobLog::Command::resume> lets you begin a new event identical in 
+tags and description to the last one. If the most recent task is ongoing an error message is emitted.
+
+You may specify tags to look for or avoid, in which case a new event is added to the log identical
+in tags and description to the most recent event matching the tag restriction.
 
 =head1 SEE ALSO
 
