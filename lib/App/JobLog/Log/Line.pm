@@ -1,6 +1,6 @@
 package App::JobLog::Log::Line;
 {
-  $App::JobLog::Log::Line::VERSION = '1.021';
+  $App::JobLog::Log::Line::VERSION = '1.022';
 }
 
 # ABSTRACT: encapsulates one line of log text
@@ -236,19 +236,19 @@ sub description : lvalue {
 # a bunch of tests
 
 
-sub is_malformed     { exists $_[0]->{malformed} }
+sub is_malformed { exists $_[0]->{malformed} }
 
 
-sub is_beginning     { exists $_[0]->{tags} }
+sub is_beginning { exists $_[0]->{tags} }
 
 
-sub is_end           { $_[0]->{done} }
+sub is_end { $_[0]->{done} }
 
 
-sub is_event         { $_[0]->{time} }
+sub is_event { $_[0]->{time} }
 
 
-sub is_comment       { exists $_[0]->{comment} }
+sub is_comment { exists $_[0]->{comment} }
 
 
 sub tags_unspecified { $_[0]->{tags_unspecified} }
@@ -302,7 +302,7 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 DESCRIPTION
 

@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 {
-  $App::JobLog::Command::summary::VERSION = '1.021';
+  $App::JobLog::Command::summary::VERSION = '1.022';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -51,7 +51,7 @@ sub execute {
 
     my $test = _make_test( $tags, $excluded_tags, $match, $no_match, $time );
     my $merge_level;
-    given ( $opt->{merge} || '' ) {
+    for ( $opt->{merge} || '' ) {
         when ('no_merge') {
             $merge_level = MERGE_NONE
         }
@@ -240,7 +240,7 @@ sub _parse_time {
     return unless $time;
     if ( $time =~ $time_re ) {
         my ( $t1, $t2 );
-        given ($b1) {
+        for ($b1) {
             when ('before') {
                 $t1 = {
                     hour     => 0,
@@ -426,7 +426,7 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 SYNOPSIS
 

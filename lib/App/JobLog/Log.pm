@@ -1,6 +1,6 @@
 package App::JobLog::Log;
 {
-  $App::JobLog::Log::VERSION = '1.021';
+  $App::JobLog::Log::VERSION = '1.022';
 }
 
 # ABSTRACT: the code that lets us interact with the log
@@ -341,7 +341,7 @@ sub find_previous {
             my $line = $io->[$i];
             my $ll   = App::JobLog::Log::Line->parse($line);
             if ( $ll->is_beginning ) {
-                given ( DateTime->compare( $ll->time, $e ) ) {
+                for ( DateTime->compare( $ll->time, $e ) ) {
                     when ( $_ < 0 ) {
                         $top = $i;
                         $et  = $ll->time;
@@ -358,7 +358,7 @@ sub find_previous {
                         # this should happen essentially never
                         return $self->_scan_for_previous( $i, $e );
                     }
-                };
+                }
             }
         }
     }
@@ -567,7 +567,7 @@ App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 DESCRIPTION
 

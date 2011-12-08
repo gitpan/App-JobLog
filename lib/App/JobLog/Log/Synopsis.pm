@@ -1,6 +1,6 @@
 package App::JobLog::Log::Synopsis;
 {
-  $App::JobLog::Log::Synopsis::VERSION = '1.021';
+  $App::JobLog::Log::Synopsis::VERSION = '1.022';
 }
 
 # ABSTRACT: consolidates App::JobClock::Log::Event objects for display
@@ -54,7 +54,7 @@ sub collect {
         my $do_merge = 0;
         my $mergand  = $previous;
         if ($previous) {
-            given ($merge_level) {
+            for ($merge_level) {
                 when (MERGE_ALL)      { $do_merge = 1 }
                 when (MERGE_ADJACENT) { $do_merge = $previous->adjacent($e) }
                 when (MERGE_SAME_TAGS) {
@@ -81,7 +81,7 @@ sub collect {
                       && $previous->same_tags($e)
                 }
                 when (MERGE_NONE) { $do_merge = 0 }
-                default { carp 'unfamiliar merge level' }
+                default { carp 'unfamiliar merge level' };
             }
         }
 
@@ -193,7 +193,7 @@ sub _new {
     carp 'requires event argument'
       unless $event && $event->isa('App::JobLog::Log::Event');
     my ( $one_interval, $one_day );
-    given ($merge_level) {
+    for ($merge_level) {
         when (MERGE_ALL)      { ( $one_interval, $one_day ) = ( 0, 0 ) }
         when (MERGE_ADJACENT) { ( $one_interval, $one_day ) = ( 1, 1 ) }
         when (MERGE_ADJACENT_SAME_TAGS) {
@@ -270,7 +270,7 @@ App::JobLog::Log::Synopsis - consolidates App::JobClock::Log::Event objects for 
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 DESCRIPTION
 

@@ -7,7 +7,6 @@ Makefile.PL
 README
 bin/job
 dist.ini
-'elect fromname, fromaddress from messages where id = 02s40000006LWiXAAW'
 lib/App/JobLog.pm
 lib/App/JobLog/Command.pm
 lib/App/JobLog/Command/add.pm

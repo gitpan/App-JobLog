@@ -1,6 +1,6 @@
 package App::JobLog::Command::info;
 {
-  $App::JobLog::Command::info::VERSION = '1.021';
+  $App::JobLog::Command::info::VERSION = '1.022';
 }
 
 # ABSTRACT: provides general App::JobLog information
@@ -25,7 +25,7 @@ sub execute {
     my $executable = prog_name($0);
     my $text;
     my @options = ( -verbose => 2, -exitval => 0, -input => $fn );
-    given ( $opt->verbosity ) {
+    for ( $opt->verbosity ) {
         when ('man') {
             $text =
                 $self->_header($executable)
@@ -46,7 +46,8 @@ sub execute {
             push @options, -noperldoc => 1;
         }
         default {
-            $text = $self->_header($executable) . <<END . $self->_footer($executable);
+            $text =
+              $self->_header($executable) . <<END . $self->_footer($executable);
 
 ==head1 For More Information
 
@@ -440,7 +441,7 @@ App::JobLog::Command::info - provides general App::JobLog information
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 SYNOPSIS
 

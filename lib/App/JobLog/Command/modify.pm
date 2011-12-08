@@ -1,6 +1,6 @@
 package App::JobLog::Command::modify;
 {
-  $App::JobLog::Command::modify::VERSION = '1.021';
+  $App::JobLog::Command::modify::VERSION = '1.022';
 }
 
 # ABSTRACT: modify last logged event
@@ -30,7 +30,7 @@ sub execute {
         $ll->tags = [ sort keys %tags ];
     }
     my $description = join ' ', @$args;
-    given ( $opt->desc || '' ) {
+    for ( $opt->desc || '' ) {
         when ('replace_description') {
             $ll->description = [$description];
         }
@@ -86,7 +86,7 @@ App::JobLog::Command::modify - modify last logged event
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 SYNOPSIS
 

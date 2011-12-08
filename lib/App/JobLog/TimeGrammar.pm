@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 {
-  $App::JobLog::TimeGrammar::VERSION = '1.021';
+  $App::JobLog::TimeGrammar::VERSION = '1.022';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -481,7 +481,7 @@ sub time_unit {
     }
     else {
         if ( my $period = $h->{period} ) {
-            given ($period) {
+            for ($period) {
                 when ('mon') { return 'months' => 1 }
                 when ('wee') { return 'weeks'  => 1 }
                 when ('pay') { return 'days'   => pay_period_length() }
@@ -522,13 +522,13 @@ sub decontextualized_date {
     my ( $h, $is_start ) = @_;
     return decontextualized_numeric_date( $h, $is_start )
       if $h->{type} eq 'numeric';
-    given ( $h->{modifier} ) {
+    for ( $h->{modifier} ) {
         when ('end')       { $is_start = 0 }
         when ('beginning') { $is_start = 1 }
     }
     if ( my $period = $h->{period} ) {
         my $date = today;
-        given ($period) {
+        for ($period) {
             when ('mon') {
                 $date->truncate( to => 'month' );
                 $date->add( months => 1 ) unless $is_start;
@@ -628,7 +628,7 @@ sub fix_date {
         if ( my $period = $d->{period} ) {
             my $date = today;
             if ( $d->{modifier} eq 'this' ) {
-                given ($period) {
+                for ($period) {
                     when ('mon') {
                         $date->truncate( to => 'month' );
                         $date->add( months => 1 ) unless $is_start;
@@ -657,7 +657,7 @@ sub fix_date {
                 $date->subtract( days => 1 ) unless $is_start;
             }
             else {
-                given ($period) {
+                for ($period) {
                     when ('mon') {
                         $date->truncate( to => 'month' );
                         if ($is_start) {
@@ -840,7 +840,7 @@ sub normalize {
                 }
             }
         }
-        given ( $h->{modifier} || '' ) {
+        for ( $h->{modifier} || '' ) {
             when (/beg/) { $h->{modifier} = 'beginning' }
             when (/end/) { $h->{modifier} = 'end' }
             when (/las/) { $h->{modifier} = 'last' }
@@ -878,7 +878,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 SYNOPSIS
 

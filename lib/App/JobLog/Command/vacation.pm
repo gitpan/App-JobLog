@@ -1,6 +1,6 @@
 package App::JobLog::Command::vacation;
 {
-  $App::JobLog::Command::vacation::VERSION = '1.021';
+  $App::JobLog::Command::vacation::VERSION = '1.022';
 }
 
 # ABSTRACT: controller for vacation dates
@@ -22,21 +22,21 @@ sub execute {
     my $vacation = App::JobLog::Vacation->new;
     if ( $opt->modification ) {
         eval {
-            given ( $opt->modification )
+            for ( $opt->modification )
             {
                 when ('add') {
                     my ( $s, $e ) = parse( $opt->add );
                     my $repeats;
-                    given ( $opt->{repeat} || '' ) {
+                    for ( $opt->{repeat} || '' ) {
                         when ('annual')  { $repeats = ANNUAL }
                         when ('monthly') { $repeats = MONTHLY }
-                        default          { $repeats = 0 }
+                        default          { $repeats = 0 };
                     }
                     my $flexibility;
-                    given ( $opt->{flexibility} || '' ) {
+                    for ( $opt->{flexibility} || '' ) {
                         when ('fixed') { $flexibility = FIXED }
                         when ('flex')  { $flexibility = FLEX }
-                        default        { $flexibility = 0 }
+                        default        { $flexibility = 0 };
                     }
                     $vacation->add(
                         description => join( ' ', @$args ),
@@ -146,7 +146,7 @@ App::JobLog::Command::vacation - controller for vacation dates
 
 =head1 VERSION
 
-version 1.021
+version 1.022
 
 =head1 SYNOPSIS
 

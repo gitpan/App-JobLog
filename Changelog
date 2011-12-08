@@ -1,5 +1,8 @@
 Revision history for App::JobLog
 
+1.022     2011-12-07 20:41:01 EST5EDT
+  * replaced deprecated "given" construct everywhere with "for"
+
 1.021     2011-11-23 06:15:30 EST5EDT
   * improved help doc for truncate command
   * removed incorrect examples from configure command help
