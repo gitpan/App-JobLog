@@ -16,6 +16,7 @@ lib/App/JobLog/Command/edit.pm
 lib/App/JobLog/Command/info.pm
 lib/App/JobLog/Command/last.pm
 lib/App/JobLog/Command/modify.pm
+lib/App/JobLog/Command/note.pm
 lib/App/JobLog/Command/parse.pm
 lib/App/JobLog/Command/resume.pm
 lib/App/JobLog/Command/summary.pm
@@ -30,6 +31,7 @@ lib/App/JobLog/Log/Day.pm
 lib/App/JobLog/Log/Event.pm
 lib/App/JobLog/Log/Format.pm
 lib/App/JobLog/Log/Line.pm
+lib/App/JobLog/Log/Note.pm
 lib/App/JobLog/Log/Synopsis.pm
 lib/App/JobLog/Time.pm
 lib/App/JobLog/TimeGrammar.pm
@@ -38,7 +40,9 @@ lib/App/JobLog/Vacation/Period.pm
 simple_test.pl
 t/Log.t
 t/LogLine.t
+t/Notes.t
 t/TimeGrammar.t
+t/app.t
 t/data/big.log
 t/data/invalid.log
 t/data/normal.log

@@ -1,6 +1,6 @@
 package App::JobLog;
 {
-  $App::JobLog::VERSION = '1.022';
+  $App::JobLog::VERSION = '1.023';
 }
 use App::Cmd::Setup -app;
 
@@ -20,7 +20,7 @@ App::JobLog - base of work log application
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 SYNOPSIS
 
@@ -37,8 +37,9 @@ version 1.022
         info: describe job log
         last: describe the last task recorded
       modify: add details to last event
+        note: take a note
        parse: parse a time expression
-      resume: resume last closed task
+      resume: resume last task
      summary: list tasks with certain properties in a particular time range
         tags: list tags employed in log or some subrange thereof
        today: what has happened today
@@ -100,6 +101,7 @@ version 1.022
  
    TOTAL HOURS 0.0
  houghton@NorthernSpy:~$ job d
+ houghton@NorthernSpy:~$ job note maybe I should take more notes
  houghton@NorthernSpy:~$ job to
  Sunday,  6 March, 2011
    9:02 - 9:03 am  0.0  messing around; messing around some more                                                                                            
@@ -123,6 +125,7 @@ version 1.022
  2011  3  6  9  3 18:DONE
  2011  3  6  9  3 48::messing around some more
  2011  3  6  9  6 30:DONE
+ 2011  3  6  9  6 35<NOTE>:maybe I should take more notes
 
 =head1 DESCRIPTION
 
@@ -193,6 +196,10 @@ Describes the last event in the log. See L<App::JobLog::Command::last>.
 =item L<modify|App::JobLog::Command::modify>
 
 Modifies the last event in the log. See L<App::JobLog::Command::modify>.
+
+=item L<note|App::JobLog::Command::note>
+
+Adds a note to the log -- text independent of any task. See L<App::JobLog::Command::note>.
 
 =item L<parse|App::JobLog::Command::parse>
 

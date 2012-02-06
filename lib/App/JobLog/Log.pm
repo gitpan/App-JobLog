@@ -1,6 +1,6 @@
 package App::JobLog::Log;
 {
-  $App::JobLog::Log::VERSION = '1.022';
+  $App::JobLog::Log::VERSION = '1.023';
 }
 
 # ABSTRACT: the code that lets us interact with the log
@@ -10,10 +10,14 @@ use Modern::Perl;
 use App::JobLog::Config qw(log init_file);
 use App::JobLog::Log::Line;
 use IO::All -utf8;
-use autouse 'Carp' => qw(carp);
-use Class::Autouse qw(DateTime);
-use Class::Autouse qw(FileHandle);
-use Class::Autouse qw(App::JobLog::Log::Event);
+use autouse 'Carp'              => qw(carp);
+use autouse 'App::JobLog::Time' => qw(now);
+use Class::Autouse qw(
+  App::JobLog::Log::Event
+  App::JobLog::Log::Note
+  DateTime
+  FileHandle
+);
 
 # some stuff useful for searching log
 use constant WINDOW   => 30;
@@ -47,6 +51,20 @@ sub new {
 }
 
 
+sub all_taglines {
+    my ($self) = @_;
+
+    # reopen log in sequential reading mode
+    $self->[IO] = io log;
+    my (@lines);
+    while ( my $line = $self->[IO]->getline ) {
+        my $ll = App::JobLog::Log::Line->parse($line);
+        push @lines, $ll if $ll->is_beginning;
+    }
+    return \@lines;
+}
+
+
 sub all_events {
     my ($self) = @_;
 
@@ -55,7 +73,7 @@ sub all_events {
     my ( @events, $previous );
     while ( my $line = $self->[IO]->getline ) {
         my $ll = App::JobLog::Log::Line->parse($line);
-        if ( $ll->is_event ) {
+        if ( $ll->is_endpoint ) {
             $previous->end = $ll->time if $previous;
             if ( $ll->is_beginning ) {
                 $previous = App::JobLog::Log::Event->new($ll);
@@ -67,6 +85,20 @@ sub all_events {
         }
     }
     return \@events;
+}
+
+
+sub all_notes {
+    my ($self) = @_;
+
+    # reopen log in sequential reading mode
+    $self->[IO] = io log;
+    my @notes;
+    while ( my $line = $self->[IO]->getline ) {
+        my $ll = App::JobLog::Log::Line->parse($line);
+        push @notes, App::JobLog::Log::Note->new($ll) if $ll->is_note;
+    }
+    return \@notes;
 }
 
 
@@ -130,10 +162,12 @@ sub validate {
 sub first_event {
     my ($self) = @_;
     return $self->[FIRST_EVENT], $self->[FIRST_INDEX] if $self->[FIRST_EVENT];
+    my $io = $self->[IO];
     my ( $i, $e ) = 0;
-    while ( my $line = $self->[IO][$i] ) {
-        my $ll = App::JobLog::Log::Line->parse($line);
-        if ( $ll->is_event ) {
+    while ( $i <= $#$io ) {
+        my $line = $io->[$i];
+        my $ll   = App::JobLog::Log::Line->parse($line);
+        if ( $ll->is_endpoint ) {
             if ($e) {
                 $e->end = $ll->time;
                 last;
@@ -150,6 +184,30 @@ sub first_event {
 }
 
 
+sub last_ts {
+    my ($self) = @_;
+    my $io     = $self->[IO];
+    my $i      = $#$io;
+    for ( ; $i >= 0 ; $i-- ) {
+        my $ll = App::JobLog::Log::Line->parse( $io->[$i] );
+        return ( $ll->time, $i ) if $ll->is_event;
+    }
+    return undef;
+}
+
+
+sub first_ts {
+    my ($self) = @_;
+    my $io     = $self->[IO];
+    my $i      = 0;
+    for ( my $lim = $#$io ; $i <= $lim ; $i++ ) {
+        my $ll = App::JobLog::Log::Line->parse( $io->[$i] );
+        return ( $ll->time, $i ) if $ll->is_event;
+    }
+    return undef;
+}
+
+
 sub last_event {
     my ($self) = @_;
     return $self->[LAST_EVENT], $self->[LAST_INDEX] if $self->[LAST_EVENT];
@@ -162,7 +220,7 @@ sub last_event {
     for ( ; $i >= 0 ; $i-- ) {
         my $line = $self->[IO][$i];
         my $ll   = App::JobLog::Log::Line->parse($line);
-        if ( $ll->is_event ) {
+        if ( $ll->is_endpoint ) {
             push @lines, $ll;
             last if $ll->is_beginning;
         }
@@ -173,6 +231,18 @@ sub last_event {
     $self->[LAST_EVENT] = $e;
     $self->[LAST_INDEX] = $i;
     return $e, $i;
+}
+
+
+sub last_note {
+    my ($self) = @_;
+    my $io = $self->[IO];
+    for ( my $i = $#$io ; $i >= 0 ; $i-- ) {
+        my $line = $io->[$i];
+        my $ll   = App::JobLog::Log::Line->parse($line);
+        return ( App::JobLog::Log::Note->new($ll), $i ) if $ll->is_note;
+    }
+    return ();
 }
 
 
@@ -252,7 +322,7 @@ sub find_events {
         while ( my $line = $io->getline ) {
             chomp $line;
             my $ll = App::JobLog::Log::Line->parse($line);
-            if ( $ll->is_event ) {
+            if ( $ll->is_endpoint ) {
                 if ( DateTime->compare( $ll->time, $end ) >= 0 ) {
                     $previous->end = $end if $previous->is_open;
                     last;
@@ -279,7 +349,7 @@ sub find_events {
         while ( my $line = $io->getline ) {
             chomp $line;
             my $ll = App::JobLog::Log::Line->parse($line);
-            if ( $ll->is_event ) {
+            if ( $ll->is_endpoint ) {
                 my $e;
                 if ( $ll->is_beginning ) {
                     $e = App::JobLog::Log::Event->new($ll);
@@ -299,6 +369,74 @@ sub find_events {
     # otherwise, do binary search for first event in range
     my ( undef, $i ) = $self->find_previous($start);
     return $self->_scan_from( $i, $start, $end );
+}
+
+
+sub find_notes {
+    my ( $self, $start, $end ) = @_;
+    my $io = $self->[IO];
+    my ( $end_time, $bottom, $start_time, $top ) =
+      ( $self->last_ts, $self->first_ts );
+
+    # if the log is empty, return empty list
+    return [] unless $start_time && $end_time;
+
+    # if the log concerns events before the time in question, return empty list
+    return []
+      unless DateTime->compare( $start, $end_time ) <= 0;
+
+    # likewise if it concerns events after
+    return [] if DateTime->compare( $start_time, $end ) > 0;
+
+    # narrow time range to that in log
+    my $c1 = DateTime->compare( $start, $start_time ) <= 0;
+    my $c2 = DateTime->compare( $end,   $end_time ) >= 0;
+    return $self->all_notes if $c1 && $c2;
+    $start = $start_time if $c1;
+    $end   = $end_time   if $c2;
+
+    # matters are simple if what we want is at the start of the log
+    if ($c1) {
+        my ( $line, @notes );
+        while ( my $line = $io->getline ) {
+            chomp $line;
+            my $ll = App::JobLog::Log::Line->parse($line);
+            if ( $ll->is_event ) {
+                if ( DateTime->compare( $ll->time, $end ) >= 0 ) {
+                    last;
+                }
+                push @notes, App::JobLog::Log::Note->new($ll) if $ll->is_note;
+            }
+        }
+        return \@notes;
+    }
+
+    # matters are likewise simple if what we want is at the end of the log
+    if ($c2) {
+
+        # must restart io
+        $io = $self->[IO] = io log;
+        $io->backwards;
+        my ( $line, @notes );
+        while ( my $line = $io->getline ) {
+            chomp $line;
+            my $ll = App::JobLog::Log::Line->parse($line);
+            if ( $ll->is_event ) {
+                $c2 = DateTime->compare( $ll->time, $start );
+                last if $c2 < 0;
+                push @notes, App::JobLog::Log::Note->new($ll) if $ll->is_note;
+                last unless $c2;
+            }
+        }
+        return \@notes;
+    }
+
+    # otherwise, do binary search for first note in range
+    my $i =
+      $self->_find_previous_note( $start, $end_time, $bottom, $start_time,
+        $top );
+    return [] unless defined $i;
+    return $self->_scan_for_note_from( $i, $start, $end );
 }
 
 
@@ -364,6 +502,51 @@ sub find_previous {
     }
 }
 
+
+sub _find_previous_note {
+    my ( $self, $e, $eb, $bottom, $et, $top ) = @_;
+    my $io = $self->[IO];
+
+    # binary search for first note in range
+    my $previous_index;
+  OUTER: while (1) {
+        return $self->_scan_for_previous_note( $top, $e )
+          if $bottom - $top + 1 <= WINDOW / 2;
+        my $index = _estimate_index( $top, $bottom, $et, $eb, $e );
+        if ( defined $previous_index && $previous_index == $index ) {
+
+            # search was too clever by half; we've entered an infinite loop
+            return $self->_scan_for_previous_note( $top, $e );
+        }
+        $previous_index = $index;
+        my $event;
+        for my $i ( $index .. $#$io ) {
+            my $line = $io->[$i];
+            my $ll   = App::JobLog::Log::Line->parse($line);
+            if ( $ll->is_event ) {
+                for ( DateTime->compare( $ll->time, $e ) ) {
+                    when ( $_ < 0 ) {
+                        $top = $i;
+                        $et  = $ll->time;
+                        next OUTER;
+                    }
+                    when ( $_ > 0 ) {
+                        $bottom = $i;
+                        $eb     = $ll->time;
+                        next OUTER;
+                    }
+                    default {
+
+                        # found beginning!!
+                        # this should happen essentially never
+                        return $self->_scan_for_previous_note( $i, $e );
+                    }
+                }
+            }
+        }
+    }
+}
+
 # now that we're close to the section of the log we want, we
 # scan it sequentially
 sub _scan_from {
@@ -375,7 +558,7 @@ sub _scan_from {
     for my $index ( $i .. $#$io ) {
         my $line = $io->[$index];
         my $ll   = App::JobLog::Log::Line->parse($line);
-        if ( $ll->is_event ) {
+        if ( $ll->is_endpoint ) {
             if ($previous) {
                 $previous->end = $ll->time if $previous->is_open;
                 push @events, $previous
@@ -400,8 +583,25 @@ sub _scan_from {
     return \@return;
 }
 
-# now that we're close to the section of the log we want, we
-# scan it sequentially
+sub _scan_for_note_from {
+    my ( $self, $i, $start, $end ) = @_;
+    my $io = $self->[IO];
+
+    # collect notes
+    my @notes;
+    for my $index ( $i .. $#$io ) {
+        my $line = $io->[$index];
+        my $ll   = App::JobLog::Log::Line->parse($line);
+        if ( $ll->is_event ) {
+            last if $ll->time > $end;
+            if ( $ll->is_note && $ll->time >= $start ) {
+                push @notes, App::JobLog::Log::Note->new($ll);
+            }
+        }
+    }
+    return \@notes;
+}
+
 sub _scan_for_previous {
     my ( $self, $i, $e ) = @_;
     my $io = $self->[IO];
@@ -411,7 +611,7 @@ sub _scan_for_previous {
     for my $index ( $i .. $#$io ) {
         my $line = $io->[$index];
         my $ll   = App::JobLog::Log::Line->parse($line);
-        if ( $ll->is_event ) {
+        if ( $ll->is_endpoint ) {
             $previous->end = $ll->time if $previous && $previous->is_open;
             last if $ll->time > $e;
             if ( $ll->is_beginning ) {
@@ -421,6 +621,24 @@ sub _scan_for_previous {
         }
     }
     return $previous, $previous_index;
+}
+
+sub _scan_for_previous_note {
+    my ( $self, $i, $e ) = @_;
+    my $io = $self->[IO];
+
+    # collect events
+    my ( $previous, $previous_index );
+    for my $index ( $i .. $#$io ) {
+        my $line = $io->[$index];
+        my $ll   = App::JobLog::Log::Line->parse($line);
+        last if $ll->time > $e;
+        if ( $ll->is_note ) {
+            $previous       = App::JobLog::Log::Note->new($ll);
+            $previous_index = $index;
+        }
+    }
+    return $previous_index // $i;
 }
 
 # your generic O(log_n) complexity bisecting search
@@ -472,13 +690,10 @@ sub append_event {
 
             # apply default tags
             $current->tags = $previous->tags if $current->tags_unspecified;
-            if ( $previous->is_closed
-                && _different_day( $previous->end, $current->time )
-                || $previous->is_open
-                && _different_day( $previous->start, $current->time ) )
-            {
 
-                # day changed
+            # check for day change
+            my ($last_ts) = $self->last_ts;
+            if ( !$last_ts || _different_day( $last_ts, $current->time ) ) {
                 $io->append(
                     App::JobLog::Log::Line->new(
                         comment => $current->time->strftime(TS)
@@ -513,6 +728,24 @@ sub append_event {
     $io->append($current)->append("\n");
     $io->close;    # flush contents
     return $duration;
+}
+
+
+sub append_note {
+    my ( $self, @args ) = @_;
+    my $note = App::JobLog::Log::Line->new( time => now, @args );
+    $note->{note} = 1;    # force this to be marked as a note
+    my $io = $self->[IO];
+
+    # check for day change
+    my ($last_ts) = $self->last_ts;
+    if ( !$last_ts || _different_day( $last_ts, $note->time ) ) {
+        $io->append(
+            App::JobLog::Log::Line->new( comment => $note->time->strftime(TS) )
+        )->append("\n");
+    }
+    $io->append($note)->append("\n");
+    $io->close;           # flush contents
 }
 
 # a test to determine whether two DateTime objects
@@ -567,7 +800,7 @@ App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 DESCRIPTION
 
@@ -586,9 +819,18 @@ if it does not yet exist, initializing the hidden job log directory in the
 process, which means creating the directory and the README file. It also opens
 an L<IO::All> object to read or modify the log with.
 
+=head2 all_taglines
+
+C<all_taglines> returns a list of all lines in the log that may have tags.
+
 =head2 all_events
 
 C<all_events> processes the log as a stream, extracting all events and 
+returning them as an array reference.
+
+=head2 all_notes
+
+C<all_notes> processes the log as a stream, extracting all notes and 
 returning them as an array reference.
 
 =head2 validate
@@ -603,10 +845,22 @@ returned.
 C<first_event> returns the first event in the log and the index
 of its line. Its return object is an L<App::JobLog::Log::Event>.
 
+=head2 last_ts
+
+Returns last L<DateTime> timestamp in log and the index of this timestamp.
+
+=head2 first_ts
+
+Returns first L<DateTime> timestamp in log.
+
 =head2 last_event
 
 C<last_event> returns the last event in the log and the index
 of its line. Its return object is an L<App::JobLog::Log::Event>.
+
+=head2 last_note
+
+Returns most recent note in log and its index, or the empty list if none is found.
 
 =head2 reverse_iterator
 
@@ -625,6 +879,20 @@ termini of an interval. It returns an array reference containing
 the portion of all logged events falling within this interval. These
 portions are represented as L<App::JobLog::Log::Event> objects.
 
+=head2 find_notes
+
+C<find_notes> expects two L<DateTime> objects representing the
+termini of an interval. It returns an array reference containing
+the portion of all logged notes falling within this interval. These
+portions are represented as L<App::JobLog::Log::Note> objects.
+
+=head2 find_previous
+
+C<find_previous> looks for the logged event previous to a given
+moment, returning the L<App::JobLog::Log::Event> objects and the
+appropriate log line number, or the empty list if no such
+event exists. It expects a L<DateTime> object as its parameter.
+
 =head2 find_previous
 
 C<find_previous> looks for the logged event previous to a given
@@ -637,6 +905,11 @@ event exists. It expects a L<DateTime> object as its parameter.
 C<append_event> expects an array of event properties. It constructs an event
 object and appends its stringification to the log, returning a L<DateTime::Duration>
 object if the previous event was left open and spanned more than one day.
+
+=head2 append_note
+
+Takes a description and a set of tags and appends it to the log as a note with the
+current timestamp.
 
 =head2 close
 

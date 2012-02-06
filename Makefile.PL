@@ -12,6 +12,9 @@ my %WriteMakefileArgs = (
   "ABSTRACT" => "log what you do",
   "AUTHOR" => "David F. Houghton <dfhoughton\@gmail.com>",
   "BUILD_REQUIRES" => {
+    "App::Cmd::Tester" => 0,
+    "Capture::Tiny" => 0,
+    "File::Path" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
     "String::Random" => 0,
@@ -51,9 +54,10 @@ my %WriteMakefileArgs = (
     "autouse" => 0,
     "base" => 0,
     "constant" => 0,
-    "overload" => 0
+    "overload" => 0,
+    "parent" => 0
   },
-  "VERSION" => "1.022",
+  "VERSION" => "1.023",
   "test" => {
     "TESTS" => "t/*.t"
   }

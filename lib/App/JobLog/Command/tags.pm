@@ -1,6 +1,6 @@
 package App::JobLog::Command::tags;
 {
-  $App::JobLog::Command::tags::VERSION = '1.022';
+  $App::JobLog::Command::tags::VERSION = '1.023';
 }
 
 # ABSTRACT: show what tags you have used
@@ -14,15 +14,26 @@ use autouse 'Getopt::Long::Descriptive' => qw(prog_name);
 sub execute {
     my ( $self, $opt, $args ) = @_;
 
-    my $events;
+    my $events = [];
     eval {
         if (@$args)
         {
             my ( $start, $end ) = parse( join( ' ', @$args ) );
-            $events = App::JobLog::Log->new->find_events( $start, $end );
+            $events = App::JobLog::Log->new->find_events( $start, $end )
+              unless $opt->notes;
+            push @$events,
+              @{ App::JobLog::Log->new->find_notes( $start, $end ) }
+              unless !( $opt->notes || $opt->all );
         }
         else {
-            $events = App::JobLog::Log->new->all_events;
+            my $method = 'all_events';
+            if ( $opt->notes ) {
+                $method = 'all_notes';
+            }
+            elsif ( $opt->all ) {
+                $method = 'all_taglines';
+            }
+            $events = App::JobLog::Log->new->$method;
         }
     };
     $self->usage_error($@) if $@;
@@ -48,8 +59,8 @@ sub abstract {
 
 sub full_description {
     <<END
-List the tags used to categorize tasks in the log or in a specified range of dates. This allows one to
-explore the categorical structure of tasks.
+List the tags used to categorize tasks or notes in the log or in a specified range of dates. This allows one to
+explore the categorical structure of tasks and notes. By default only tags associated with notes are listed.
 
 The date expressions understood are the same as those understood by the C<summary> command.
 END
@@ -62,11 +73,15 @@ sub options {
               . __PACKAGE__->name
               . '\' to see full details.'
         ],
+        [ 'notes|n', 'only list tags used on notes' ],
+        [ 'all|a',   'list tags for both notes and tasks' ],
     );
 }
 
 sub validate {
     my ( $self, $opt, $args ) = @_;
+    $self->usage_error('--notes conflicts will --all')
+      if $opt->notes && $opt->all;
 }
 
 1;
@@ -81,10 +96,18 @@ App::JobLog::Command::tags - show what tags you have used
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 SYNOPSIS
 
+ houghton@NorthernSpy:~$ job tags --help
+ job <command>
+ 
+ job tags [-an] [long options...] [date or date range]
+ 	Use 'job help tags' to see full details.
+ 	-n --notes   only list tags used on notes
+ 	-a --all     list tags for both notes and tasks
+ 	--help       this usage screen
  houghton@NorthernSpy:~$ job tags this week
 
  foo
@@ -102,6 +125,8 @@ time range. This allows one to examine how tasks have been categorized (and perh
 been mis-typed).
 
 The time expressions understood are the same as are understood by L<App::JobLog::Command::summary>.
+
+By default note tags are not listed. Use the --notes or --all options if you wish to include these.
 
 =head1 SEE ALSO
 

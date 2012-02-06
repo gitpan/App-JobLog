@@ -1,5 +1,12 @@
 Revision history for App::JobLog
 
+1.023     2012-02-06 17:10:17 EST5EDT
+  * fixed warning thrown during summarization when last event is open
+  * removed some dead code
+  * various refactorings related to creating App::JobLog::Note class
+  * addition of the note command
+  * numerous small bug fixes
+
 1.022     2011-12-07 20:41:01 EST5EDT
   * replaced deprecated "given" construct everywhere with "for"
 

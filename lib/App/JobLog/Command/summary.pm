@@ -1,6 +1,6 @@
 package App::JobLog::Command::summary;
 {
-  $App::JobLog::Command::summary::VERSION = '1.022';
+  $App::JobLog::Command::summary::VERSION = '1.023';
 }
 
 # ABSTRACT: show what you did during a particular period
@@ -99,18 +99,23 @@ sub execute {
 
     # record hiding options in hash reference
     my $hidden = {
-        vacation => $opt->{no_vacation},
-        date     => $dateless || $opt->{no_date} || is_hidden('date'),
-        time        => $opt->{no_time}        || is_hidden('time'),
-        duration    => $opt->{no_duration}    || is_hidden('duration'),
+        vacation => $opt->{no_vacation} || $opt->{notes},
+        date => $dateless || $opt->{no_date} || is_hidden('date'),
+        time => $opt->{no_time} || is_hidden('time'),
+        duration => $opt->{notes}
+          || $opt->{no_duration}
+          || is_hidden('duration'),
         tags        => $opt->{no_tags}        || is_hidden('tags'),
         description => $opt->{no_description} || is_hidden('description'),
-        totals      => $opt->{no_totals},
+        totals      => $opt->{notes}          || $opt->{no_totals},
     };
 
     # parse time expression
     my ( $days, $show_year );
-    eval { ( $days, $show_year ) = summary join( ' ', @$args ), $test, $hidden };
+    eval {
+        ( $days, $show_year ) = summary join( ' ', @$args ), $test, $hidden,
+          $opt->{notes};
+    };
     $self->usage_error($@) if $@;
     unless ( $opt->{hidden} ) {
 
@@ -291,12 +296,12 @@ sub abstract {
 
 sub full_description {
     <<END
-List events with certain properties in a particular time range. Only the portions
-of events falling within the range will be listed.
+List events or notes with certain properties in a particular time range. Only the notes or
+portions of events falling within the range will be listed.
 
-Events may be filtered in numerous ways: by tag, time of day, or terms used in descriptions.
-If tags to match are provided, only those events that contain at least one such tag will be shown. If
-tags not to match are provided, only those events that contain none of these tags will be shown.
+Events and notes may be filtered in numerous ways: by tag, time of day, or terms used in descriptions.
+If tags to match are provided, only those items that contain at least one such tag will be shown. If
+tags not to match are provided, only those items that contain none of these tags will be shown.
 
 If you provide description filters to match or avoid, these will be interpreted as regexes. Try 'perldoc perlre'
 for more details, or perhaps 'perldoc perlretut' (these will only work if you have the Perl documentation
@@ -310,13 +315,14 @@ or 'after' (or some prefix of these such as 'bef' or 'aft') may be followed by a
 expressions separated by a dash. The code will attempt to infer the precise time of ambiguous time expressions,
 but it's best to be explicit. Case is ignored. Whitespace is optional in the expected places.
 
-Note that any filtering of events, event specifying particular times for the start and end of the period in question,
+Note that any filtering of events specifying particular times for the start and end of the period in question,
 e.g., "yesterday at 8:00 am until today", will cause all flex time vacation to be ignored. This is because, given
-the flexible nature of this vacation, it is unclear how much should be accounted for when filtering events.
+the flexible nature of this vacation, it is unclear how much should be accounted for when filtering events. Since
+notes are not "on the clock", no consideration of vacation periods is used in filtering them.
 
-@{[__PACKAGE__->name]} provides many ways to consolidate events. These are the "merge" options. By default events
-are grouped into days and within days into subgroups of adjacent events with the same tags. All the merge options
-that require adjacency will also group by days but not vice versa. 
+@{[__PACKAGE__->name]} provides many ways to consolidate events and notes. These are the "merge" options
+By default items are grouped into days and within days into subgroups of adjacent items with the same tags.
+All the merge options that require adjacency will also group by days but not vice versa. 
 END
 }
 
@@ -328,64 +334,68 @@ sub options {
               . '\' to see full details.'
         ],
         [],
+        [ 'notes|n', 'show notes instead of events' ],
         [
             'tag|t=s@',
-            'filter events to include only those with given tags; '
+            'filter events/notes to include only those with given tags; '
               . 'multiple tags may be specified'
         ],
         [
             'exclude-tag|T=s@',
-            'filter events to exclude those with given tags; '
+            'filter events/notes to exclude those with given tags; '
               . 'multiple tags may be specified'
         ],
         [
             'match|m=s@',
-'filter events to include only those one of whose descriptions matches the given regex; '
+'filter events/notes to include only those one of whose descriptions matches the given regex; '
               . 'multiple regexes may be specified'
         ],
         [
             'no-match|M=s@',
-'filter events to include only those one of whose descriptions do not match the given regex; '
+'filter events/notes to include only those one of whose descriptions do not match the given regex; '
               . 'multiple regexes may be specified'
         ],
         [
             'time|i=s',
-'consider only those portions of events that overlap the given time range'
+'consider only those portions of events/notes that overlap the given time range'
         ],
         [
             "merge" => hidden => {
                 one_of => [
                     [
                         "merge-all|mall|ma" =>
-                          "glom all events into one synopsis"
+                          "glom all events/notes into one synopsis"
                     ],
                     [ "merge-adjacent|madj" => "merge contiguous events" ],
                     [
                         "merge-adjacent-same-tags|mast" =>
-"merge contiguous, identically-tagged events (default)"
+"merge contiguous, identically-tagged events/notes (default)"
                     ],
                     [
                         "merge-same-tags|mst" =>
-                          "merge all identically tagged events"
+                          "merge all identically tagged events/notes"
                     ],
                     [
                         "merge-same-day|msd" =>
-                          "merge all events in a given day"
+                          "merge all events/notes in a given day"
                     ],
                     [
                         "merge-same-day-same-tags|msdst" =>
-                          "merge all events in a given day"
+                          "merge all events/notes in a given day"
                     ],
-                    [ "no-merge|nm" => "keep all events separate" ],
+                    [ "no-merge|nm" => "keep all events/notes separate" ],
                 ]
             }
         ],
-        [ 'no-vacation|V',  'do not display vacation hours' ],
-        [ 'no-date',        'do not display a date before each distinct day' ],
-        [ 'no-time',        'do not display event start and end times' ],
+        [ 'no-vacation|V', 'do not display vacation hours' ],
+        [ 'no-date',       'do not display a date before each distinct day' ],
+        [
+            'no-time',
+            'do not display event or note start times and event end times'
+        ],
         [ 'no-duration',    'do not display event durations' ],
         [ 'no-tags',        'do not display tags' ],
-        [ 'no-description', 'do not display event descriptions' ],
+        [ 'no-description', 'do not display event/note descriptions' ],
         [
             'no-totals',
             'do not display the footer containing total hours worked, etc.'
@@ -426,51 +436,58 @@ App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 SYNOPSIS
 
  houghton@NorthernSpy:~$ job summary --help
  job <command>
  
- job summary [-ciMmTtVW] [long options...] <date or date range>
+ job summary [-ciMmnTtVW] [long options...] <date or date range>
  	Use 'job help summary' to see full details.
  	                                  
- 	-t --tag                            filter events to include only
+ 	-n --notes                          show notes instead of events
+ 	-t --tag                            filter events/notes to include
+ 	                                    only those with given tags;
+ 	                                    multiple tags may be specified
+ 	-T --exclude-tag                    filter events/notes to exclude
  	                                    those with given tags; multiple
  	                                    tags may be specified
- 	-T --exclude-tag                    filter events to exclude those
- 	                                    with given tags; multiple tags
- 	                                    may be specified
- 	-m --match                          filter events to include only
- 	                                    those one of whose descriptions
- 	                                    matches the given regex; multiple
- 	                                    regexes may be specified
- 	-M --no-match                       filter events to include only
- 	                                    those one of whose descriptions
- 	                                    do not match the given regex;
- 	                                    multiple regexes may be specified
+ 	-m --match                          filter events/notes to include
+ 	                                    only those one of whose
+ 	                                    descriptions matches the given
+ 	                                    regex; multiple regexes may be
+ 	                                    specified
+ 	-M --no-match                       filter events/notes to include
+ 	                                    only those one of whose
+ 	                                    descriptions do not match the
+ 	                                    given regex; multiple regexes may
+ 	                                    be specified
  	-i --time                           consider only those portions of
- 	                                    events that overlap the given
- 	                                    time range
- 	--ma --mall --merge-all             glom all events into one synopsis
+ 	                                    events/notes that overlap the
+ 	                                    given time range
+ 	--ma --mall --merge-all             glom all events/notes into one
+ 	                                    synopsis
  	--madj --merge-adjacent             merge contiguous events
  	--mast --merge-adjacent-same-tags   merge contiguous,
- 	                                    identically-tagged events
+ 	                                    identically-tagged events/notes
  	                                    (default)
  	--mst --merge-same-tags             merge all identically tagged
- 	                                    events
- 	--msd --merge-same-day              merge all events in a given day
- 	--msdst --merge-same-day-same-tags  merge all events in a given day
- 	--nm --no-merge                     keep all events separate
+ 	                                    events/notes
+ 	--msd --merge-same-day              merge all events/notes in a given
+ 	                                    day
+ 	--msdst --merge-same-day-same-tags  merge all events/notes in a given
+ 	                                    day
+ 	--nm --no-merge                     keep all events/notes separate
  	-V --no-vacation                    do not display vacation hours
  	--no-date                           do not display a date before each
  	                                    distinct day
- 	--no-time                           do not display event start and
- 	                                    end times
+ 	--no-time                           do not display event or note
+ 	                                    start times and event end times
  	--no-duration                       do not display event durations
  	--no-tags                           do not display tags
- 	--no-description                    do not display event descriptions
+ 	--no-description                    do not display event/note
+ 	                                    descriptions
  	--no-totals                         do not display the footer
  	                                    containing total hours worked,
  	                                    etc.
@@ -493,6 +510,13 @@ version 1.022
    TOTAL HOURS 1.07
    bar         1.07
    foo         1.07
+ houghton@NorthernSpy:~$ job s --notes this week
+ Monday,  6 February
+   1:32 - 1:33 pm         giving this thing a test run; maybe the second note will be faster                                                     
+   2:08 - 4:31 pm  foo    testing out note tagging; another note that should have the same tag; taking a note                                    
+   4:32 - 4:33 pm  money  taking a note about money; taking another note that will be tagged with money                                          
+          4:33 pm         taking a note without any tags                                                                                         
+ 
  houghton@NorthernSpy:~$ job s this month
  Tuesday,  1 March, 2011
       8:00 - 9:23 am  1.39  widgets   adding handling of simplified pdf docs                                                                                            
@@ -544,7 +568,8 @@ version 1.022
 =head1 DESCRIPTION
 
 B<App::JobLog::Command::summary> is the command that extracts pretty reports from the log. Its options are all
-concerned with filtering events and formatting the report.
+concerned with filtering events and formatting the report. The report must be either a report of tasks or a
+report of notes.
 
 =head1 SEE ALSO
 

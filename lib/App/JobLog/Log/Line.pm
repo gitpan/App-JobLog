@@ -1,6 +1,6 @@
 package App::JobLog::Log::Line;
 {
-  $App::JobLog::Log::Line::VERSION = '1.022';
+  $App::JobLog::Log::Line::VERSION = '1.023';
 }
 
 # ABSTRACT: encapsulates one line of log text
@@ -18,16 +18,18 @@ use overload '""' => \&to_string;
 use overload 'bool' => sub { 1 };
 
 # some global variables for use in BNF regex
-our ( $date, @tags, @description, $is_beginning );
+our ( $date, @tags, @description, $is_beginning, $is_note );
 
 # log line parser
 our $re = qr{
-    ^ (?&ts) : (?&non_ts) $
+    ^ (?&ts) (?&non_ts) $
     (?(DEFINE)
      (?<ts> (\d{4}+\s++\d++\s++\d++\s++\d++\s++\d++\s++\d++) (?{$date = $^N}) )
-     (?<non_ts> (?&done) (?{$is_beginning = undef})| (?&event) (?{$is_beginning = 1}))
-     (?<done> DONE)
-     (?<event> (?&tags) : (?&descriptions))
+     (?<non_ts> (?&note) | (?&duration_mark) )
+     (?<duration_mark> : (?: (?&done) | (?&event) ) )
+     (?<done> DONE )
+     (?<note> <NOTE> (?&event) (?{$is_note = 1}) )
+     (?<event> (?&tags) : (?&descriptions) (?{$is_beginning = 1}) )
      (?<tags> (?:(?&tag)(\s++(?&tag))*+)?)
      (?<tag> ((?:[^\s:\\]|(?&escaped))++) (?{push @tags, $^N}))
      (?<escaped> \\.)
@@ -108,7 +110,7 @@ sub parse {
         }
         return $obj;
     }
-    local ( $date, @tags, @description, $is_beginning );
+    local ( $date, @tags, @description, $is_beginning, $is_note );
     if ( $text =~ $re ) {
 
         # must use to_string to obtain text
@@ -136,6 +138,7 @@ sub parse {
                     $v
                   } @description
             ];
+            $obj->{note} = 1 if $is_note;
         }
         else {
             $obj->{done} = 1;
@@ -159,7 +162,8 @@ sub clone {
     elsif ( $self->is_event ) {
         $clone->time = $self->time->clone;
         if ( $self->is_beginning ) {
-            $clone->tags        = [ @{ $self->tags } ];
+            $clone->{note} = 1 if $self->is_note;
+            $clone->tags = [ @{ $self->tags } ];
             $clone->description = [ @{ $self->description } ];
         }
     }
@@ -176,7 +180,7 @@ sub to_string {
     return $self->{text} if exists $self->{text};
     if ( $self->is_event ) {
         my $text = $self->time_stamp;
-        $text .= ':';
+        $text .= $self->is_note ? '<NOTE>' : ':';
         if ( $self->is_beginning ) {
             $self->tags ||= [];
             my %tags = map { $_ => 1 } @{ $self->tags };
@@ -245,7 +249,13 @@ sub is_beginning { exists $_[0]->{tags} }
 sub is_end { $_[0]->{done} }
 
 
+sub is_note { $_[0]->{note} }
+
+
 sub is_event { $_[0]->{time} }
+
+
+sub is_endpoint { $_[0]->{time} && !$_[0]->{note} }
 
 
 sub is_comment { exists $_[0]->{comment} }
@@ -302,7 +312,7 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 DESCRIPTION
 
@@ -367,9 +377,19 @@ Whether line describes the beginning of an event.
 
 Whether line only defines the end of an event.
 
+=head2 is_note
+
+Whether the line is a note rather than a terminus of an event or
+a comment or blank line.
+
 =head2 is_event
 
-Whether line defines the beginning or end of an event.
+Whether line has a time stamp.
+
+=head2 is_endpoint
+
+Whether the line has a timestamp marking the beginning or end of a logged
+interval.
 
 =head2 is_comment
 

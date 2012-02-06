@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 {
-  $App::JobLog::Log::Day::VERSION = '1.022';
+  $App::JobLog::Log::Day::VERSION = '1.023';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -27,6 +27,9 @@ sub new {
     $class = ref $class || $class;
     bless { events => [], vacation => [], synopses => [], %opts }, $class;
 }
+
+
+sub concerns_notes { $_[0]->{notes} }
 
 sub start { $_[0]->{start} }
 
@@ -66,6 +69,7 @@ sub no_date { $_[0]->{no_date} }
 
 sub times {
     my ( $self, $times ) = @_;
+    return if $self->concerns_notes;
 
     for my $e ( @{ $self->events }, @{ $self->vacation } ) {
         my @tags = @{ $e->tags };
@@ -169,7 +173,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 DESCRIPTION
 
@@ -181,6 +185,10 @@ to see how much vacation time applies.
 =head2 new
 
 Your basic constructor. It can be called on the class or an instance.
+
+=head2
+
+Whether this day summarizes notes rather than events.
 
 =head2 skip_flex
 

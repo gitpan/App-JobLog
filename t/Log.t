@@ -5,11 +5,13 @@ use strict;
 use warnings;
 use autodie;
 
+use File::Path qw(remove_tree);
 use File::Temp ();
 use App::JobLog::Config qw(log DIRECTORY);
 use App::JobLog::Log::Line;
 use App::JobLog::Log;
 use App::JobLog::Time qw(tz);
+use Capture::Tiny qw(capture);
 use DateTime;
 use File::Spec;
 use IO::All -utf8;
@@ -61,7 +63,10 @@ subtest 'log validation' => sub {
     my $io = io $file;
     $io > io log;
     my $log = App::JobLog::Log->new;
-    $log->validate;
+    my ( $stdout, $stderr ) = capture {
+        $log->validate;
+    };
+    note $stderr;
     my $text = io(log)->slurp;
     ok( index( $text, <<END) > -1, 'found misplaced "DONE"' );
 # ERROR; task end without corresponding beginning
@@ -133,19 +138,22 @@ for my $size (qw(tiny small normal big)) {
             $end->add( days => 1 )->subtract( seconds => 1 );
             my $events = $log->find_events( $d, $end );
             if ( $dates{$ts} ) {
-                ok( @$events, 'found events' );
+                ok( @$events, "found events for $ts");
                 my $e = $events->[-1];
                 if ($e) {
                     my $tags = $e->tags;
-                    ok( ref $tags eq 'ARRAY', 'obtained tags' );
+                    ok( ref $tags eq 'ARRAY', "obtained tags for $ts" );
                     if ($tags) {
-                        ok( @$tags, 'tags found for event' );
-                        ok( $tags->[0] == @$events,
-                            'correct number of events for day' );
+                        ok( @$tags > 0, "tags found for events on $ts" );
+                        is(
+                            $tags->[0],
+                            scalar @$events,
+                            "correct number of events for $ts"
+                        );
                     }
                 }
                 else {
-                    fail('event is undefined');
+                    fail("event is undefined for $ts");
                 }
             }
             else {
@@ -191,3 +199,5 @@ subtest 'iterating over events in reverse' => sub {
 };
 
 done_testing();
+
+remove_tree $dir;

@@ -1,6 +1,6 @@
 package App::JobLog::Log::Synopsis;
 {
-  $App::JobLog::Log::Synopsis::VERSION = '1.022';
+  $App::JobLog::Log::Synopsis::VERSION = '1.023';
 }
 
 # ABSTRACT: consolidates App::JobClock::Log::Event objects for display
@@ -124,6 +124,7 @@ sub same_day {
 # whether given event is immediately adjacent to last event in synopsis
 sub adjacent {
     my ( $self, $event ) = @_;
+    return 1 if !$event->can('end');    # notes are always considered adjacent
     my $d1 = ( $self->events )[-1]->end || now;
     my $d2 = $event->start;
     return DateTime->compare( $d1, $d2 ) == 0;
@@ -191,7 +192,7 @@ sub last_event { ( $_[0]->events )[-1] }
 sub _new {
     my ( $event, $merge_level ) = @_;
     carp 'requires event argument'
-      unless $event && $event->isa('App::JobLog::Log::Event');
+      unless $event && $event->isa('App::JobLog::Log::Note');
     my ( $one_interval, $one_day );
     for ($merge_level) {
         when (MERGE_ALL)      { ( $one_interval, $one_day ) = ( 0, 0 ) }
@@ -224,6 +225,7 @@ sub single_day { $_[0]->{one_day} }
 sub duration {
     my ($self) = @_;
     my @events = $self->events;
+    return 0 unless $events[0]->can('end');    # notes have no duration
     if ( $self->single_interval ) {
         my ( $se, $ee ) = ( $events[0], $events[$#events] );
         my ( $start, $end ) = ( $se->start, $ee->end || now );
@@ -241,7 +243,11 @@ sub time_fmt {
     my ($self) = @_;
     my @events = $self->events;
     my ( $se, $ee ) = ( $events[0], $events[$#events] );
-    my ( $start, $end ) = ( $se->start, $ee->end );
+    if ( @events == 1 && !$se->can('end') ) {    # single note
+        return $se->start->strftime('%l:%M %P');
+    }
+    my ( $start, $end ) =
+      ( $se->start, $ee->can('end') ? $ee->end : $ee->start );
     my $s;
     if ($end) {
         return 'vacation'
@@ -270,7 +276,7 @@ App::JobLog::Log::Synopsis - consolidates App::JobClock::Log::Event objects for 
 
 =head1 VERSION
 
-version 1.022
+version 1.023
 
 =head1 DESCRIPTION
 
