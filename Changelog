@@ -1,5 +1,8 @@
 Revision history for App::JobLog
 
+1.024     2012-02-12 11:59:53 EST5EDT
+  * put error handling into App::JobLog::Log::Format::wrap
+
 1.023     2012-02-06 17:10:17 EST5EDT
   * fixed warning thrown during summarization when last event is open
   * removed some dead code

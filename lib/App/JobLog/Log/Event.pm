@@ -1,6 +1,6 @@
 package App::JobLog::Log::Event;
 {
-  $App::JobLog::Log::Event::VERSION = '1.023';
+  $App::JobLog::Log::Event::VERSION = '1.024';
 }
 
 # ABSTRACT: basically adds an end time to App::JobLog::Log::Line events
@@ -141,7 +141,7 @@ App::JobLog::Log::Event - basically adds an end time to App::JobLog::Log::Line e
 
 =head1 VERSION
 
-version 1.023
+version 1.024
 
 =head1 DESCRIPTION
 

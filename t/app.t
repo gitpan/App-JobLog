@@ -59,11 +59,11 @@ subtest 'note summary' => sub {
         $log->$method( time => $t, description => 'foo' . $count++ );
         $t->add( hours => 6 );
     }
-    my $result = test_app( 'App::JobLog' => [qw(summary --notes 2011/1)] );
+    my $result = test_app( 'App::JobLog' => [qw(summary -W --notes 2011/1)] );
     is( $result->error, undef, 'threw no exceptions' );
     like( $result->stdout, qr/foo/, 'found some notes' );
     test_app( 'App::JobLog' => [qw(note testing)] );
-    $result = test_app( 'App::JobLog' => [qw(summary --notes today)] );
+    $result = test_app( 'App::JobLog' => [qw(summary -W --notes today)] );
     like( $result->stdout, qr/testing/, 'found appended note' );
 };
 

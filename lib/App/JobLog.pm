@@ -1,6 +1,6 @@
 package App::JobLog;
 {
-  $App::JobLog::VERSION = '1.023';
+  $App::JobLog::VERSION = '1.024';
 }
 use App::Cmd::Setup -app;
 
@@ -20,7 +20,7 @@ App::JobLog - base of work log application
 
 =head1 VERSION
 
-version 1.023
+version 1.024
 
 =head1 SYNOPSIS
 

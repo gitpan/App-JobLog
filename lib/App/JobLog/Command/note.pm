@@ -1,6 +1,6 @@
 package App::JobLog::Command::note;
 {
-  $App::JobLog::Command::note::VERSION = '1.023';
+  $App::JobLog::Command::note::VERSION = '1.024';
 }
 
 # ABSTRACT: take a note
@@ -76,7 +76,7 @@ App::JobLog::Command::note - take a note
 
 =head1 VERSION
 
-version 1.023
+version 1.024
 
 =head1 SYNOPSIS
 

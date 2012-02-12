@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 {
-  $App::JobLog::Log::Format::VERSION = '1.023';
+  $App::JobLog::Log::Format::VERSION = '1.024';
 }
 
 # ABSTRACT: pretty printer for log
@@ -318,10 +318,14 @@ sub _define_format {
 
 sub wrap {
     my ( $text, $columns ) = @_;
-    $Text::WrapI18N::columns = $columns;
-    my $s = Text::WrapI18N::wrap( '', '', $text );
-    my @ar = $s =~ /^.*$/mg;
-    return \@ar;
+    my @ar;
+    eval {
+        $Text::WrapI18N::columns = $columns;
+        my $s = Text::WrapI18N::wrap( '', '', $text );
+        @ar = $s =~ /^.*$/mg;
+    };
+    return \@ar unless $@;
+    return [$text];
 }
 
 
@@ -345,7 +349,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.023
+version 1.024
 
 =head1 DESCRIPTION
 
