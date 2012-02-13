@@ -1,6 +1,6 @@
 package App::JobLog::Log::Note;
 {
-  $App::JobLog::Log::Note::VERSION = '1.024';
+  $App::JobLog::Log::Note::VERSION = '1.025';
 }
 
 # ABSTRACT: timestamped annotation in log
@@ -99,7 +99,7 @@ App::JobLog::Log::Note - timestamped annotation in log
 
 =head1 VERSION
 
-version 1.024
+version 1.025
 
 =head1 DESCRIPTION
 

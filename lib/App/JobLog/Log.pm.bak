@@ -1,10 +1,16 @@
 package App::JobLog::Log;
-{
-  $App::JobLog::Log::VERSION = '1.025';
-}
 
 # ABSTRACT: the code that lets us interact with the log
 
+=head1 DESCRIPTION
+
+C<App::JobLog::Log> uses an L<IO::All> object to extract information from the
+log file or add lines to it.
+
+This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
+you want the details.
+
+=cut
 
 use Modern::Perl;
 use App::JobLog::Config qw(log init_file);
@@ -34,6 +40,14 @@ use constant LAST_INDEX  => 4;
 # timestamp format
 use constant TS => '%Y/%m/%d';
 
+=method new
+
+C<new> is the constructor, naturally. It touches the log file into existence
+if it does not yet exist, initializing the hidden job log directory in the
+process, which means creating the directory and the README file. It also opens
+an L<IO::All> object to read or modify the log with.
+
+=cut
 
 sub new {
 
@@ -50,6 +64,11 @@ sub new {
     return $self;
 }
 
+=method all_taglines
+
+C<all_taglines> returns a list of all lines in the log that may have tags.
+
+=cut
 
 sub all_taglines {
     my ($self) = @_;
@@ -64,6 +83,12 @@ sub all_taglines {
     return \@lines;
 }
 
+=method all_events
+
+C<all_events> processes the log as a stream, extracting all events and 
+returning them as an array reference.
+
+=cut
 
 sub all_events {
     my ($self) = @_;
@@ -87,6 +112,12 @@ sub all_events {
     return \@events;
 }
 
+=method all_notes
+
+C<all_notes> processes the log as a stream, extracting all notes and 
+returning them as an array reference.
+
+=cut
 
 sub all_notes {
     my ($self) = @_;
@@ -101,6 +132,14 @@ sub all_notes {
     return \@notes;
 }
 
+=method validate
+
+C<validate> makes sure the log contains only valid lines, all events are 
+in chronological order, and every ending follows a beginning. Invalid lines
+are commented out and a warning is emitted. The number of errors found is
+returned.
+
+=cut
 
 sub validate {
     my ($self) = @_;
@@ -158,6 +197,12 @@ sub validate {
     return $errors;
 }
 
+=method first_event
+
+C<first_event> returns the first event in the log and the index
+of its line. Its return object is an L<App::JobLog::Log::Event>.
+
+=cut
 
 sub first_event {
     my ($self) = @_;
@@ -183,6 +228,11 @@ sub first_event {
     return $e, $self->[FIRST_INDEX];
 }
 
+=method last_ts
+
+Returns last L<DateTime> timestamp in log and the index of this timestamp.
+
+=cut
 
 sub last_ts {
     my ($self) = @_;
@@ -195,6 +245,11 @@ sub last_ts {
     return undef;
 }
 
+=method first_ts
+
+Returns first L<DateTime> timestamp in log.
+
+=cut
 
 sub first_ts {
     my ($self) = @_;
@@ -207,6 +262,12 @@ sub first_ts {
     return undef;
 }
 
+=method last_event
+
+C<last_event> returns the last event in the log and the index
+of its line. Its return object is an L<App::JobLog::Log::Event>.
+
+=cut
 
 sub last_event {
     my ($self) = @_;
@@ -233,6 +294,11 @@ sub last_event {
     return $e, $i;
 }
 
+=method last_note
+
+Returns most recent note in log and its index, or the empty list if none is found.
+
+=cut
 
 sub last_note {
     my ($self) = @_;
@@ -245,6 +311,17 @@ sub last_note {
     return ();
 }
 
+=method reverse_iterator
+
+C<reverse_iterator> returns a closure that allows you to iterate
+over the events in the log in reverse. Every time you call the closure
+it returns the next unvisited event.
+
+If you pass this method an optional argument, either a L<DateTime> or a 
+L<App::JobLog::Log::Event>, it will iterate from the event beginning at or
+after this event or time.
+
+=cut
 
 sub reverse_iterator {
     my ( $self, $event ) = @_;
@@ -288,6 +365,14 @@ sub reverse_iterator {
     };
 }
 
+=method find_events
+
+C<find_events> expects two L<DateTime> objects representing the
+termini of an interval. It returns an array reference containing
+the portion of all logged events falling within this interval. These
+portions are represented as L<App::JobLog::Log::Event> objects.
+
+=cut
 
 sub find_events {
     my ( $self, $start, $end ) = @_;
@@ -371,6 +456,14 @@ sub find_events {
     return $self->_scan_from( $i, $start, $end );
 }
 
+=method find_notes
+
+C<find_notes> expects two L<DateTime> objects representing the
+termini of an interval. It returns an array reference containing
+the portion of all logged notes falling within this interval. These
+portions are represented as L<App::JobLog::Log::Note> objects.
+
+=cut
 
 sub find_notes {
     my ( $self, $start, $end ) = @_;
@@ -439,6 +532,14 @@ sub find_notes {
     return $self->_scan_for_note_from( $i, $start, $end );
 }
 
+=method find_previous
+
+C<find_previous> looks for the logged event previous to a given
+moment, returning the L<App::JobLog::Log::Event> objects and the
+appropriate log line number, or the empty list if no such
+event exists. It expects a L<DateTime> object as its parameter.
+
+=cut
 
 sub find_previous {
     my ( $self, $e ) = @_;
@@ -503,6 +604,14 @@ sub find_previous {
     }
 }
 
+=method find_previous
+
+C<find_previous> looks for the logged event previous to a given
+moment, returning the L<App::JobLog::Log::Event> objects and the
+appropriate log line number, or the empty list if no such
+event exists. It expects a L<DateTime> object as its parameter.
+
+=cut
 
 sub _find_previous_note {
     my ( $self, $e, $eb, $bottom, $et, $top ) = @_;
@@ -666,6 +775,13 @@ sub _estimate_index {
     return $top + $i;
 }
 
+=method append_event
+
+C<append_event> expects an array of event properties. It constructs an event
+object and appends its stringification to the log, returning a L<DateTime::Duration>
+object if the previous event was left open and spanned more than one day.
+
+=cut
 
 sub append_event {
     my ( $self, @args ) = @_;
@@ -731,6 +847,12 @@ sub append_event {
     return $duration;
 }
 
+=method append_note
+
+Takes a description and a set of tags and appends it to the log as a note with the
+current timestamp.
+
+=cut
 
 sub append_note {
     my ( $self, @args ) = @_;
@@ -758,6 +880,12 @@ sub _different_day {
         && $d1->year == $d2->year );
 }
 
+=method close
+
+C<close> closes the L<IO::All> object, if it exists and is open, forcing
+all content to be written to the log.
+
+=cut
 
 sub close {
     my ($self) = @_;
@@ -765,6 +893,13 @@ sub close {
     $io->close if $io && $io->is_open;
 }
 
+=method insert
+
+C<insert> takes an insertion index and a list of L<App::JobLog::Log::Line> objects
+and inserts the latter into the log at the index preceded by a comment explaining
+that these lines have been inserted.
+
+=cut
 
 sub insert {
     my ( $self, $index, @lines ) = @_;
@@ -782,6 +917,11 @@ sub insert {
     splice @{ $self->[IO] }, $index, 0, $comment, @lines;
 }
 
+=method replace
+
+Replace one line with another.
+
+=cut
 
 sub replace {
     my ( $self, $index, $line ) = @_;
@@ -791,152 +931,3 @@ sub replace {
 }
 
 1;
-
-__END__
-=pod
-
-=head1 NAME
-
-App::JobLog::Log - the code that lets us interact with the log
-
-=head1 VERSION
-
-version 1.025
-
-=head1 DESCRIPTION
-
-C<App::JobLog::Log> uses an L<IO::All> object to extract information from the
-log file or add lines to it.
-
-This wasn't written to be used outside of C<App::JobLog>. The code itself contains interlinear comments if
-you want the details.
-
-=head1 METHODS
-
-=head2 new
-
-C<new> is the constructor, naturally. It touches the log file into existence
-if it does not yet exist, initializing the hidden job log directory in the
-process, which means creating the directory and the README file. It also opens
-an L<IO::All> object to read or modify the log with.
-
-=head2 all_taglines
-
-C<all_taglines> returns a list of all lines in the log that may have tags.
-
-=head2 all_events
-
-C<all_events> processes the log as a stream, extracting all events and 
-returning them as an array reference.
-
-=head2 all_notes
-
-C<all_notes> processes the log as a stream, extracting all notes and 
-returning them as an array reference.
-
-=head2 validate
-
-C<validate> makes sure the log contains only valid lines, all events are 
-in chronological order, and every ending follows a beginning. Invalid lines
-are commented out and a warning is emitted. The number of errors found is
-returned.
-
-=head2 first_event
-
-C<first_event> returns the first event in the log and the index
-of its line. Its return object is an L<App::JobLog::Log::Event>.
-
-=head2 last_ts
-
-Returns last L<DateTime> timestamp in log and the index of this timestamp.
-
-=head2 first_ts
-
-Returns first L<DateTime> timestamp in log.
-
-=head2 last_event
-
-C<last_event> returns the last event in the log and the index
-of its line. Its return object is an L<App::JobLog::Log::Event>.
-
-=head2 last_note
-
-Returns most recent note in log and its index, or the empty list if none is found.
-
-=head2 reverse_iterator
-
-C<reverse_iterator> returns a closure that allows you to iterate
-over the events in the log in reverse. Every time you call the closure
-it returns the next unvisited event.
-
-If you pass this method an optional argument, either a L<DateTime> or a 
-L<App::JobLog::Log::Event>, it will iterate from the event beginning at or
-after this event or time.
-
-=head2 find_events
-
-C<find_events> expects two L<DateTime> objects representing the
-termini of an interval. It returns an array reference containing
-the portion of all logged events falling within this interval. These
-portions are represented as L<App::JobLog::Log::Event> objects.
-
-=head2 find_notes
-
-C<find_notes> expects two L<DateTime> objects representing the
-termini of an interval. It returns an array reference containing
-the portion of all logged notes falling within this interval. These
-portions are represented as L<App::JobLog::Log::Note> objects.
-
-=head2 find_previous
-
-C<find_previous> looks for the logged event previous to a given
-moment, returning the L<App::JobLog::Log::Event> objects and the
-appropriate log line number, or the empty list if no such
-event exists. It expects a L<DateTime> object as its parameter.
-
-=head2 find_previous
-
-C<find_previous> looks for the logged event previous to a given
-moment, returning the L<App::JobLog::Log::Event> objects and the
-appropriate log line number, or the empty list if no such
-event exists. It expects a L<DateTime> object as its parameter.
-
-=head2 append_event
-
-C<append_event> expects an array of event properties. It constructs an event
-object and appends its stringification to the log, returning a L<DateTime::Duration>
-object if the previous event was left open and spanned more than one day.
-
-=head2 append_note
-
-Takes a description and a set of tags and appends it to the log as a note with the
-current timestamp.
-
-=head2 close
-
-C<close> closes the L<IO::All> object, if it exists and is open, forcing
-all content to be written to the log.
-
-=head2 insert
-
-C<insert> takes an insertion index and a list of L<App::JobLog::Log::Line> objects
-and inserts the latter into the log at the index preceded by a comment explaining
-that these lines have been inserted.
-
-=head2 replace
-
-Replace one line with another.
-
-=head1 AUTHOR
-
-David F. Houghton <dfhoughton@gmail.com>
-
-=head1 COPYRIGHT AND LICENSE
-
-This software is copyright (c) 2011 by David F. Houghton.
-
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
-
-=cut
-
