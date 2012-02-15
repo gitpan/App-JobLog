@@ -41,7 +41,7 @@ subtest 'basic test' => sub {
         $log->append_event( time => $t, description => 'foo' . $count++ );
         $t->add( hours => 6 );
     }
-    my $result = test_app( 'App::JobLog' => [qw(summary 2011/1)] );
+    my $result = test_app( 'App::JobLog' => [qw(summary -W 2011/1)] );
     is( $result->error, undef, 'threw no exceptions' );
 };
 
