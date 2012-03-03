@@ -27,7 +27,6 @@ lib/App/JobLog/Command/vacation.pm
 lib/App/JobLog/Command/when.pm
 lib/App/JobLog/Config.pm
 lib/App/JobLog/Log.pm
-lib/App/JobLog/Log.pm.bak
 lib/App/JobLog/Log/Day.pm
 lib/App/JobLog/Log/Event.pm
 lib/App/JobLog/Log/Format.pm

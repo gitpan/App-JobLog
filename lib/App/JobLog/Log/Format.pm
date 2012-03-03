@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 {
-  $App::JobLog::Log::Format::VERSION = '1.026';
+  $App::JobLog::Log::Format::VERSION = '1.027';
 }
 
 # ABSTRACT: pretty printer for log
@@ -79,9 +79,10 @@ sub summary {
                         push @{ $d->events }, $e;
                         last;
                     }
-                    last if $e->is_open;
+                    # I believe these is_open bits are mistaken
+                    # last if $e->is_open;
                     unless ($do_notes) {
-                        last if $e->is_open || $d->start > $e->end;
+                        last if $d->start > $e->end;
                     }
                 }
             }
@@ -349,7 +350,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.026
+version 1.027
 
 =head1 DESCRIPTION
 

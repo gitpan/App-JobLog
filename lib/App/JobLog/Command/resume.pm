@@ -1,6 +1,6 @@
 package App::JobLog::Command::resume;
 {
-  $App::JobLog::Command::resume::VERSION = '1.026';
+  $App::JobLog::Command::resume::VERSION = '1.027';
 }
 
 # ABSTRACT: resume last closed task
@@ -95,7 +95,7 @@ App::JobLog::Command::resume - resume last closed task
 
 =head1 VERSION
 
-version 1.026
+version 1.027
 
 =head1 SYNOPSIS
 

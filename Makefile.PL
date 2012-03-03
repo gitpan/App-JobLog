@@ -43,6 +43,7 @@ my %WriteMakefileArgs = (
     "DateTime::TimeZone" => "1.30",
     "Exporter" => 0,
     "File::HomeDir" => 0,
+    "File::Path" => "2.06",
     "File::ReadBackwards" => 0,
     "FileHandle" => 0,
     "IO::All" => 0,
@@ -57,7 +58,7 @@ my %WriteMakefileArgs = (
     "overload" => 0,
     "parent" => 0
   },
-  "VERSION" => "1.026",
+  "VERSION" => "1.027",
   "test" => {
     "TESTS" => "t/*.t"
   }

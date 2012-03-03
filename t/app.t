@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+#
+# some tests that collect the output of commands via App::Cmd::Tester
 
 use 5.006;
 use strict;
@@ -16,6 +18,7 @@ use DateTime;
 use File::Spec;
 use IO::All -utf8;
 use FileHandle;
+use DateTime::TimeZone;
 
 use Test::More;
 use App::Cmd::Tester;
@@ -112,6 +115,36 @@ subtest 'tags' => sub {
     unlike( $result->stdout, qr/description/, 'did not find description tag' );
     like( $result->stdout, qr/note/, 'found note tag' );
 };
+
+SKIP: {
+    skip 'developer test', 1 unless $ENV{JOBLOG_TESTING};
+    subtest 'last event error message' => sub {
+        local $App::JobLog::Time::now;
+        local $App::JobLog::Config::tz;
+        $App::JobLog::Config::tz =
+          DateTime::TimeZone->new( name => 'America/New_York' );
+        my $now = DateTime->new(
+            year      => 2012,
+            month     => 3,
+            day       => 3,
+            hour      => 12,
+            minute    => 16,
+            time_zone => tz
+        );
+        $App::JobLog::Time::now = $now;
+
+        # make a big log
+        '' > io log;
+        my $log = App::JobLog::Log->new;
+        my $then = $now->clone->subtract( days => 1 );
+        $log->append_event(
+            time        => $then,
+            description => 'what happened yesterday'
+        );
+        my $result = test_app( 'App::JobLog' => ['last'] );
+        ok($result->stdout =~ /ongoing/, 'properly reported ongoing event spanning day boundary');
+    };
+}
 
 done_testing();
 

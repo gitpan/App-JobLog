@@ -1,5 +1,12 @@
 Revision history for App::JobLog
 
+1.027     2012-03-03 12:49:40 EST5EDT
+  * made info command more up-to-date
+  * made time grammar understand future expressions like tomorrow and next
+    week
+  * improved last command so it properly reports events spanning the day
+    boundary
+
 1.026     2012-02-14 20:17:51 EST5EDT
   * tinkered with app.t to get the test to pass on machines on which wrapping
     is busted

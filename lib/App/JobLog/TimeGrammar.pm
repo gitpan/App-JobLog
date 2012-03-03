@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 {
-  $App::JobLog::TimeGrammar::VERSION = '1.026';
+  $App::JobLog::TimeGrammar::VERSION = '1.027';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -201,7 +201,7 @@ my $re = qr{
      
      (?<now> now (?{ $buffer{day} = 'today' }))
 
-     (?<relative_period_no_time> ( yesterday | today ) (?{ $buffer{day} = $^N }))
+     (?<relative_period_no_time> ( yesterday | today | tomorrow ) (?{ $buffer{day} = $^N }))
 
      (?<month_day> (?&at_time_on) (?&month_day_no_time) | (?&month_day_no_time) (?&at_time))
 
@@ -271,7 +271,7 @@ my $re = qr{
 
      (?<short_month> jan | feb | mar | apr | may | jun | jul | aug | sep | oct | nov | dec )
 
-     (?<modifier> last | this )
+     (?<modifier> last | this | next )
 
      (?<period_modifier> (?&modifier) | (?&termini) (?: \s++ of (?: \s++ the )? )? )
      
@@ -600,6 +600,10 @@ sub fix_date {
                 $date->subtract( days => 1 );
                 return $date;
             }
+            elsif ( $day eq 'tom' ) {
+                $date->add( days => 1 );
+                return $date;
+            }
             init_day_abbr();
             my $day_num    = $day_abbr{$day};
             my $todays_num = $date->day_of_week;
@@ -621,6 +625,7 @@ sub fix_date {
                     $delta = 7 - $day_num + $todays_num;
                 }
                 $date->subtract( days => $delta );
+                $date->add( days => 14 ) if $d->{modifier} eq 'next';
                 return $date;
             }
         }
@@ -666,6 +671,7 @@ sub fix_date {
                         else {
                             $date->subtract( days => 1 );
                         }
+                        $date->add( months => 2 ) if $d->{modifier} eq 'next';
                     }
                     when ('wee') {
                         my $is_sunday = $date->day_of_week == 7;
@@ -679,6 +685,7 @@ sub fix_date {
                         else {
                             $date->subtract( days => 1 );
                         }
+                        $date->add( days => 14 ) if $d->{modifier} eq 'next';
                     }
                     when ('yea') {
                         $date->truncate( to => 'year' );
@@ -688,6 +695,7 @@ sub fix_date {
                         else {
                             $date->subtract( days => 1 );
                         }
+                        $date->add( years => 2 ) if $d->{modifier} eq 'next';
                     }
                     when ('pay') {
                         my $days =
@@ -700,6 +708,8 @@ sub fix_date {
                         else {
                             $date->subtract( days => 1 );
                         }
+                        $date->add( days => 2 * pay_period_length )
+                          if $d->{modifier} eq 'next';
                     }
                 }
             }
@@ -845,6 +855,7 @@ sub normalize {
             when (/end/) { $h->{modifier} = 'end' }
             when (/las/) { $h->{modifier} = 'last' }
             when (/thi/) { $h->{modifier} = 'this' }
+            when (/nex/) { $h->{modifier} = 'next' }
         }
     }
 }
@@ -857,10 +868,10 @@ sub is_fixed {
       if exists $h->{year};
     if ( $h->{type} eq 'verbal' ) {
         if ( exists $h->{modifier} ) {
-            return 1 if $h->{modifier} =~ /this|last/;
+            return 1 if $h->{modifier} =~ /this|last|next/;
         }
         if ( exists $h->{day} ) {
-            return 1 if $h->{day} =~ /yes|tod/;
+            return 1 if $h->{day} =~ /yes|tod|tom/;
         }
     }
     return 0;
@@ -878,7 +889,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.026
+version 1.027
 
 =head1 SYNOPSIS
 
@@ -965,7 +976,7 @@ to facilitate finding them.
   <modifiable_day_no_time> = [ <modifier> s ] <weekday>
         <modifiable_month> = [ <month_modifier> s ] <month>
        <modifiable_period> = [ <period_modifier> s ] <period>
-                <modifier> = "last" | "this" 
+                <modifier> = "last" | "this" | "next"
                    <month> = <full_month> | <short_month> 
                <month_day> = <at_time_on> <month_day_no_time> | <month_day_no_time> <at_time>
        <month_day_no_time> = <month_first> | <day_first>
@@ -980,7 +991,7 @@ to facilitate finding them.
                   <period> = "week" | "month" | "year" | <pay>
          <period_modifier> = <modifier> | <termini> [ s "of" [ s "the" ] ] 
          <relative_period> = [ <at> s* ] <time> s <relative_period_no_time> | <relative_period_no_time> <at_time> | <now>
- <relative_period_no_time> = "yesterday" | "today"
+ <relative_period_no_time> = "yesterday" | "today" | "tomorrow"
              <short_month> = "jan" | "feb" | "mar" | "apr" | "may" | "jun" | "jul" | "aug" | "sep" | "oct" | "nov" | "dec"
            <short_weekday> = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat" 
             <span_divider> = s* ( "-"+ | ( "through" | "thru" | "to" | "til" [ "l" ] | "until" ) ) s*
@@ -994,17 +1005,6 @@ to facilitate finding them.
                       <ym> = <year> <divider> d{1,2}
 
 In general C<App::JobLog::TimeGrammar> will understand most time expressions you are likely to want to use.
-
-=head2 FUTURE
-
-B<TimeGrammar> does not generally understand the future. It understants C<this> and C<last> but not C<next>. It
-understands C<today> and C<yesterday> but not C<tomorrow>. This may change (in the future), but most tasks that
-involve the log do not require explicit reference to the future, since all the events in the log are necessarily
-in the past. It would sometimes be useful to say a particular vacation date is C<tomorrow> or C<next month>, however.
-
-If you specify a period part of which is in the future, this will cause no difficulties, and in fact both endpoints
-will be parsed out correctly, but again, because the log only concerns the past the future times will have no effect
-on the output. It is simply easier to say C<this month> than C<the beginning of the month until today>.
 
 =head1 METHODS
 

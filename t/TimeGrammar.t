@@ -144,6 +144,29 @@ subtest 'pay period' => sub {
     );
 };
 
+subtest 'tomorrow' => sub {
+    my $tomorrow = $now->clone->add( days => 1 );
+    my ( undef, $e ) = parse('tomorrow');
+    ok(
+        $e->year == $tomorrow->year
+          && $e->month == $tomorrow->month
+          && $e->day == $tomorrow->day,
+        'correctly parsed \'tomorrow\''
+    );
+    my $yesterday = $now->clone->subtract( days => 1 );
+    my $s;
+    ( $s, $e ) = parse('yesterday - tomorrow');
+    ok(
+        $e->year == $tomorrow->year
+          && $e->month == $tomorrow->month
+          && $e->day == $tomorrow->day
+          && $s->year == $yesterday->year
+          && $s->month == $yesterday->month
+          && $s->day == $yesterday->day,
+        'correctly parsed \'yesterday - tomorrow\''
+    );
+};
+
 done_testing();
 
 sub time_test {

@@ -1,6 +1,6 @@
 package App::JobLog::Log::Line;
 {
-  $App::JobLog::Log::Line::VERSION = '1.026';
+  $App::JobLog::Log::Line::VERSION = '1.027';
 }
 
 # ABSTRACT: encapsulates one line of log text
@@ -81,6 +81,11 @@ sub new {
             $self->{description} = $description;
         }
         elsif ( defined $description ) {
+
+            # normalize whitespace; this is useful for testing
+            $description =~ s/^\s++|\s++$//g;
+            $description =~ s/\s++/ /g;
+            
             $description = [$description];
         }
         else {
@@ -312,7 +317,7 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.026
+version 1.027
 
 =head1 DESCRIPTION
 

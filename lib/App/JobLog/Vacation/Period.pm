@@ -1,6 +1,6 @@
 package App::JobLog::Vacation::Period;
 {
-  $App::JobLog::Vacation::Period::VERSION = '1.026';
+  $App::JobLog::Vacation::Period::VERSION = '1.027';
 }
 
 # ABSTRACT: extension of L<App::JobLog::Log::Event> to handle special properties of vacation periods
@@ -343,7 +343,7 @@ App::JobLog::Vacation::Period - extension of L<App::JobLog::Log::Event> to handl
 
 =head1 VERSION
 
-version 1.026
+version 1.027
 
 =head1 DESCRIPTION
 
