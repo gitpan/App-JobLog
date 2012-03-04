@@ -1,6 +1,6 @@
 package App::JobLog::Command::truncate;
 {
-  $App::JobLog::Command::truncate::VERSION = '1.027';
+  $App::JobLog::Command::truncate::VERSION = '1.028';
 }
 
 # ABSTRACT: decapitate the log
@@ -179,7 +179,7 @@ App::JobLog::Command::truncate - decapitate the log
 
 =head1 VERSION
 
-version 1.027
+version 1.028
 
 =head1 SYNOPSIS
 

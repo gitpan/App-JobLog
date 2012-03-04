@@ -46,6 +46,7 @@ t/app.t
 t/data/big.log
 t/data/invalid.log
 t/data/normal.log
+t/data/notes.log
 t/data/small.log
 t/data/tiny.log
 t/make_log.pl

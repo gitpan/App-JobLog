@@ -138,7 +138,7 @@ for my $size (qw(tiny small normal big)) {
             $end->add( days => 1 )->subtract( seconds => 1 );
             my $events = $log->find_events( $d, $end );
             if ( $dates{$ts} ) {
-                ok( @$events, "found events for $ts");
+                ok( @$events, "found events for $ts" );
                 my $e = $events->[-1];
                 if ($e) {
                     my $tags = $e->tags;
@@ -196,6 +196,29 @@ subtest 'iterating over events in reverse' => sub {
         ok( $count == @events - $index,
             "found correct number of events iterating from event $index" );
     }
+};
+
+subtest 'finding notes' => sub {
+
+    # copy log data over
+    my $file = File::Spec->catfile( 't', 'data', 'notes.log' );
+    my $io = io $file;
+    $io > io log;
+
+    my $log = App::JobLog::Log->new;
+    my $start =
+      DateTime->new( year => 2012, month => 3, day => 1, time_zone => tz );
+    my $end = $start->clone->add( days => 2 )->subtract( seconds => 1 );
+    my $notes = $log->find_notes( $start, $end );
+    ok( @$notes == 3, 'found all notes at end of log' );
+    $start = $start->subtract( days => 1 );
+    $end = $start->clone->add( days => 1 )->subtract( seconds => 1 );
+    $notes = $log->find_notes( $start, $end );
+    ok( @$notes == 7, 'found all notes at top of log' );
+    $start = $start->add( days => 1 );
+    $end = $start->clone->add( days => 1 )->subtract( seconds => 1 );
+    $notes = $log->find_notes( $start, $end );
+    ok( @$notes == 1, 'found all notes in middle of log' );
 };
 
 done_testing();

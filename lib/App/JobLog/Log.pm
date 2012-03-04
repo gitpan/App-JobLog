@@ -1,6 +1,6 @@
 package App::JobLog::Log;
 {
-  $App::JobLog::Log::VERSION = '1.027';
+  $App::JobLog::Log::VERSION = '1.028';
 }
 
 # ABSTRACT: the code that lets us interact with the log
@@ -424,7 +424,7 @@ sub find_notes {
             if ( $ll->is_event ) {
                 $c2 = DateTime->compare( $ll->time, $start );
                 last if $c2 < 0;
-                push @notes, App::JobLog::Log::Note->new($ll) if $ll->is_note;
+                unshift @notes, App::JobLog::Log::Note->new($ll) if $ll->is_note;
                 last unless $c2;
             }
         }
@@ -633,10 +633,12 @@ sub _scan_for_previous_note {
     for my $index ( $i .. $#$io ) {
         my $line = $io->[$index];
         my $ll   = App::JobLog::Log::Line->parse($line);
-        last if $ll->time > $e;
-        if ( $ll->is_note ) {
-            $previous       = App::JobLog::Log::Note->new($ll);
-            $previous_index = $index;
+        if ( $ll->is_event ) {
+            last if $ll->time > $e;
+            if ( $ll->is_note ) {
+                $previous       = App::JobLog::Log::Note->new($ll);
+                $previous_index = $index;
+            }
         }
     }
     return $previous_index // $i;
@@ -801,7 +803,7 @@ App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.027
+version 1.028
 
 =head1 DESCRIPTION
 

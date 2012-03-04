@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 {
-  $App::JobLog::Log::Format::VERSION = '1.027';
+  $App::JobLog::Log::Format::VERSION = '1.028';
 }
 
 # ABSTRACT: pretty printer for log
@@ -350,7 +350,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.027
+version 1.028
 
 =head1 DESCRIPTION
 
