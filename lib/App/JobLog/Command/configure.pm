@@ -1,6 +1,6 @@
 package App::JobLog::Command::configure;
 {
-  $App::JobLog::Command::configure::VERSION = '1.028';
+  $App::JobLog::Command::configure::VERSION = '1.029';
 }
 
 # ABSTRACT: examine or modify App::JobLog configuration
@@ -274,7 +274,7 @@ App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.028
+version 1.029
 
 =head1 SYNOPSIS
 
