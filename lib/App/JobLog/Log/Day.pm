@@ -1,6 +1,6 @@
 package App::JobLog::Log::Day;
 {
-  $App::JobLog::Log::Day::VERSION = '1.029';
+  $App::JobLog::Log::Day::VERSION = '1.030';
 }
 
 # ABSTRACT: collects events and vacation in a complete day
@@ -165,6 +165,7 @@ sub pseudo_event {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -173,7 +174,7 @@ App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -244,4 +245,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

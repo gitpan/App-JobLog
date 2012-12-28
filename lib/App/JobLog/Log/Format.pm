@@ -1,6 +1,6 @@
 package App::JobLog::Log::Format;
 {
-  $App::JobLog::Log::Format::VERSION = '1.029';
+  $App::JobLog::Log::Format::VERSION = '1.030';
 }
 
 # ABSTRACT: pretty printer for log
@@ -73,12 +73,14 @@ sub summary {
     for my $big_e (@$events) {
         for my $e ( $big_e->split_days ) {
             if ( $e = $test->($e) ) {
-                push @gathered, shift @days while $days[0]->end < $e->start;
+                push @gathered, shift @days
+                  while @days && $days[0]->end < $e->start;
                 for my $d (@days) {
                     if ( $e->intersects( $d->pseudo_event ) ) {
                         push @{ $d->events }, $e;
                         last;
                     }
+
                     # I believe these is_open bits are mistaken
                     # last if $e->is_open;
                     unless ($do_notes) {
@@ -342,6 +344,7 @@ sub duration { sprintf DURATION_FORMAT, $_[0] / ( 60 * 60 ) }
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -350,7 +353,7 @@ App::JobLog::Log::Format - pretty printer for log
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -401,4 +404,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

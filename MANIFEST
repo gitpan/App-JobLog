@@ -38,6 +38,8 @@ lib/App/JobLog/TimeGrammar.pm
 lib/App/JobLog/Vacation.pm
 lib/App/JobLog/Vacation/Period.pm
 simple_test.pl
+t/00-compile.t
+t/000-report-versions-tiny.t
 t/Log.t
 t/LogLine.t
 t/Notes.t
@@ -47,6 +49,8 @@ t/data/big.log
 t/data/invalid.log
 t/data/normal.log
 t/data/notes.log
+t/data/regression1.log
 t/data/small.log
 t/data/tiny.log
 t/make_log.pl
+t/regression.t

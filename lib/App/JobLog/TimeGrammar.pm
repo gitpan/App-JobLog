@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 {
-  $App::JobLog::TimeGrammar::VERSION = '1.029';
+  $App::JobLog::TimeGrammar::VERSION = '1.030';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -879,7 +879,7 @@ sub is_fixed {
 
 1;
 
-
+__END__
 
 =pod
 
@@ -889,7 +889,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 SYNOPSIS
 
@@ -1042,7 +1042,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

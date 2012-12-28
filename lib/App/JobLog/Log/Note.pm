@@ -1,6 +1,6 @@
 package App::JobLog::Log::Note;
 {
-  $App::JobLog::Log::Note::VERSION = '1.029';
+  $App::JobLog::Log::Note::VERSION = '1.030';
 }
 
 # ABSTRACT: timestamped annotation in log
@@ -91,6 +91,7 @@ sub is_open { 0 }
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -99,7 +100,7 @@ App::JobLog::Log::Note - timestamped annotation in log
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -167,4 +168,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

@@ -1,6 +1,6 @@
 package App::JobLog::Command::truncate;
 {
-  $App::JobLog::Command::truncate::VERSION = '1.029';
+  $App::JobLog::Command::truncate::VERSION = '1.030';
 }
 
 # ABSTRACT: decapitate the log
@@ -169,7 +169,7 @@ sub _pick_compression {
 
 1;
 
-
+__END__
 
 =pod
 
@@ -179,7 +179,7 @@ App::JobLog::Command::truncate - decapitate the log
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 SYNOPSIS
 
@@ -231,7 +231,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

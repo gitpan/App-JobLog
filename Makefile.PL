@@ -14,12 +14,13 @@ my %WriteMakefileArgs = (
   "BUILD_REQUIRES" => {
     "App::Cmd::Tester" => 0,
     "Capture::Tiny" => 0,
+    "File::Find" => 0,
     "File::Path" => 0,
     "File::Spec" => 0,
     "File::Temp" => 0,
     "String::Random" => 0,
     "Test::Fatal" => 0,
-    "Test::More" => 0,
+    "Test::More" => "0.88",
     "autodie" => 0,
     "strict" => 0,
     "warnings" => 0
@@ -58,7 +59,7 @@ my %WriteMakefileArgs = (
     "overload" => 0,
     "parent" => 0
   },
-  "VERSION" => "1.029",
+  "VERSION" => "1.030",
   "test" => {
     "TESTS" => "t/*.t"
   }

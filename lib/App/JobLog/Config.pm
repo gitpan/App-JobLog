@@ -1,6 +1,6 @@
 package App::JobLog::Config;
 {
-  $App::JobLog::Config::VERSION = '1.029';
+  $App::JobLog::Config::VERSION = '1.030';
 }
 
 # ABSTRACT: central depot for App::JobLog configuration parameters and controller allowing their modification
@@ -233,7 +233,7 @@ sub start_pay_period {
             time_zone => _tz(),
         );
     }
-    return undef;
+    return;
 }
 
 # abstracts out code for maintaining config file
@@ -341,6 +341,7 @@ sub _tz {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -349,7 +350,7 @@ App::JobLog::Config - central depot for App::JobLog configuration parameters and
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -447,4 +448,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

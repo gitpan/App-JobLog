@@ -1,6 +1,6 @@
 package App::JobLog::Command::when;
 {
-  $App::JobLog::Command::when::VERSION = '1.029';
+  $App::JobLog::Command::when::VERSION = '1.030';
 }
 
 # ABSTRACT: when you'll be done for the day
@@ -165,8 +165,6 @@ sub options {
 
 1;
 
-
-
 =pod
 
 =head1 NAME
@@ -175,7 +173,7 @@ App::JobLog::Command::when - when you'll be done for the day
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 SYNOPSIS
 
@@ -234,7 +232,6 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
 
 __END__
 

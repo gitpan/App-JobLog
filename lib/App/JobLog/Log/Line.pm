@@ -1,6 +1,6 @@
 package App::JobLog::Log::Line;
 {
-  $App::JobLog::Log::Line::VERSION = '1.029';
+  $App::JobLog::Log::Line::VERSION = '1.030';
 }
 
 # ABSTRACT: encapsulates one line of log text
@@ -309,6 +309,7 @@ sub exists_tag {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -317,7 +318,7 @@ App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -432,4 +433,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

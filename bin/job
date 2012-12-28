@@ -6,8 +6,8 @@
 use App::JobLog;
 App::JobLog->run;
 
-
 __END__
+
 =pod
 
 =head1 NAME
@@ -16,7 +16,7 @@ job - log what you do
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 SYNOPSIS
 
@@ -53,4 +53,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

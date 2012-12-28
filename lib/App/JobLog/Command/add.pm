@@ -1,6 +1,6 @@
 package App::JobLog::Command::add;
 {
-  $App::JobLog::Command::add::VERSION = '1.029';
+  $App::JobLog::Command::add::VERSION = '1.030';
 }
 
 # ABSTRACT: log an event
@@ -78,7 +78,7 @@ sub validate {
 
 1;
 
-
+__END__
 
 =pod
 
@@ -88,7 +88,7 @@ App::JobLog::Command::add - log an event
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 SYNOPSIS
 
@@ -138,7 +138,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

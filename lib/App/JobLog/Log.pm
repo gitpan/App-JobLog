@@ -1,6 +1,6 @@
 package App::JobLog::Log;
 {
-  $App::JobLog::Log::VERSION = '1.029';
+  $App::JobLog::Log::VERSION = '1.030';
 }
 
 # ABSTRACT: the code that lets us interact with the log
@@ -36,6 +36,8 @@ use constant TS => '%Y/%m/%d';
 
 
 sub new {
+    my $class = shift;
+    $class = ref $class if ref $class;
 
     # touch log into existence
     unless ( -e log ) {
@@ -45,7 +47,7 @@ sub new {
     }
 
     # using an array to make things a little snappier
-    my $self = bless [];
+    my $self = bless [], $class;
     $self->[IO] = io log;
     return $self;
 }
@@ -192,7 +194,7 @@ sub last_ts {
         my $ll = App::JobLog::Log::Line->parse( $io->[$i] );
         return ( $ll->time, $i ) if $ll->is_event;
     }
-    return undef;
+    return;
 }
 
 
@@ -204,7 +206,7 @@ sub first_ts {
         my $ll = App::JobLog::Log::Line->parse( $io->[$i] );
         return ( $ll->time, $i ) if $ll->is_event;
     }
-    return undef;
+    return;
 }
 
 
@@ -225,7 +227,7 @@ sub last_event {
             last if $ll->is_beginning;
         }
     }
-    return undef unless @lines;
+    return () unless @lines;
     my $e = App::JobLog::Log::Event->new( pop @lines );
     $e->end = $lines[0]->time if @lines;
     $self->[LAST_EVENT] = $e;
@@ -268,7 +270,7 @@ sub reverse_iterator {
     my ( undef, $index, $io ) =
       ( $self->find_previous( $event->start ), $self->[IO] );
     return sub {
-        return undef unless $event;
+        return () unless $event;
         my $e        = $event;
         my $end_time = $event->start;
         $event = undef;
@@ -424,7 +426,8 @@ sub find_notes {
             if ( $ll->is_event ) {
                 $c2 = DateTime->compare( $ll->time, $start );
                 last if $c2 < 0;
-                unshift @notes, App::JobLog::Log::Note->new($ll) if $ll->is_note;
+                unshift @notes, App::JobLog::Log::Note->new($ll)
+                  if $ll->is_note;
                 last unless $c2;
             }
         }
@@ -795,6 +798,7 @@ sub replace {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -803,7 +807,7 @@ App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -941,4 +945,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

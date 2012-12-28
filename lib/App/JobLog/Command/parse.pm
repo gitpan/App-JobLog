@@ -1,6 +1,6 @@
 package App::JobLog::Command::parse;
 {
-  $App::JobLog::Command::parse::VERSION = '1.029';
+  $App::JobLog::Command::parse::VERSION = '1.030';
 }
 
 # ABSTRACT: parse a time expression
@@ -50,7 +50,7 @@ END
 
 1;
 
-
+__END__
 
 =pod
 
@@ -60,7 +60,7 @@ App::JobLog::Command::parse - parse a time expression
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -89,7 +89,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

@@ -1,6 +1,6 @@
 package App::JobLog::Command::configure;
 {
-  $App::JobLog::Command::configure::VERSION = '1.029';
+  $App::JobLog::Command::configure::VERSION = '1.030';
 }
 
 # ABSTRACT: examine or modify App::JobLog configuration
@@ -264,7 +264,7 @@ sub validate {
 
 1;
 
-
+__END__
 
 =pod
 
@@ -274,7 +274,7 @@ App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 SYNOPSIS
 
@@ -429,7 +429,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-

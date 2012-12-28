@@ -1,6 +1,6 @@
 package App::JobLog::Vacation;
 {
-  $App::JobLog::Vacation::VERSION = '1.029';
+  $App::JobLog::Vacation::VERSION = '1.030';
 }
 
 # ABSTRACT: controller for the vacation model
@@ -17,7 +17,9 @@ use FileHandle;
 
 
 sub new {
-    my $self = bless { changed => 0 };
+    my $class = shift;
+    $class = ref $class if ref $class;
+    my $self = bless { changed => 0 }, $class;
     if ( -e vacation ) {
         my $fh = FileHandle->new(vacation);
         my @data;
@@ -158,6 +160,7 @@ sub _widths {
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -166,7 +169,7 @@ App::JobLog::Vacation - controller for the vacation model
 
 =head1 VERSION
 
-version 1.029
+version 1.030
 
 =head1 DESCRIPTION
 
@@ -214,4 +217,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
