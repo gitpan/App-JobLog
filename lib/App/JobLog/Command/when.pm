@@ -1,6 +1,6 @@
 package App::JobLog::Command::when;
 {
-  $App::JobLog::Command::when::VERSION = '1.030';
+  $App::JobLog::Command::when::VERSION = '1.031';
 }
 
 # ABSTRACT: when you'll be done for the day
@@ -173,7 +173,7 @@ App::JobLog::Command::when - when you'll be done for the day
 
 =head1 VERSION
 
-version 1.030
+version 1.031
 
 =head1 SYNOPSIS
 

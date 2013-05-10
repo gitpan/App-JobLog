@@ -1,6 +1,6 @@
 package App::JobLog::TimeGrammar;
 {
-  $App::JobLog::TimeGrammar::VERSION = '1.030';
+  $App::JobLog::TimeGrammar::VERSION = '1.031';
 }
 
 # ABSTRACT: parse natural (English) language time expressions
@@ -889,7 +889,7 @@ App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.030
+version 1.031
 
 =head1 SYNOPSIS
 
