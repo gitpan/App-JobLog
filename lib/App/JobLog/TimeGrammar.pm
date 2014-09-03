@@ -1,8 +1,5 @@
 package App::JobLog::TimeGrammar;
-{
-  $App::JobLog::TimeGrammar::VERSION = '1.031';
-}
-
+$App::JobLog::TimeGrammar::VERSION = '1.032';
 # ABSTRACT: parse natural (English) language time expressions
 
 
@@ -30,6 +27,7 @@ use autouse 'App::JobLog::Time' => qw(
   today
   tz
 );
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 # some variables we need visible inside the date parsing regex
 # %matches holds a complete parsing
@@ -883,13 +881,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::TimeGrammar - parse natural (English) language time expressions
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

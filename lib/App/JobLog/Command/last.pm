@@ -1,8 +1,5 @@
 package App::JobLog::Command::last;
-{
-  $App::JobLog::Command::last::VERSION = '1.031';
-}
-
+$App::JobLog::Command::last::VERSION = '1.032';
 # ABSTRACT: show details of last recorded event
 
 use Modern::Perl;
@@ -84,13 +81,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::last - show details of last recorded event
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

@@ -1,8 +1,5 @@
 package App::JobLog::Log::Line;
-{
-  $App::JobLog::Log::Line::VERSION = '1.031';
-}
-
+$App::JobLog::Log::Line::VERSION = '1.032';
 # ABSTRACT: encapsulates one line of log text
 
 
@@ -24,7 +21,7 @@ our ( $date, @tags, @description, $is_beginning, $is_note );
 our $re = qr{
     ^ (?&ts) (?&non_ts) $
     (?(DEFINE)
-     (?<ts> (\d{4}+\s++\d++\s++\d++\s++\d++\s++\d++\s++\d++) (?{$date = $^N}) )
+     (?<ts> (\d{4}\s++\d++\s++\d++\s++\d++\s++\d++\s++\d++) (?{$date = $^N}) )
      (?<non_ts> (?&note) | (?&duration_mark) )
      (?<duration_mark> : (?: (?&done) | (?&event) ) )
      (?<done> DONE )
@@ -312,13 +309,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Log::Line - encapsulates one line of log text
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

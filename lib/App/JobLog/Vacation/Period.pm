@@ -1,8 +1,5 @@
 package App::JobLog::Vacation::Period;
-{
-  $App::JobLog::Vacation::Period::VERSION = '1.031';
-}
-
+$App::JobLog::Vacation::Period::VERSION = '1.032';
 # ABSTRACT: extension of L<App::JobLog::Log::Event> to handle special properties of vacation periods
 
 
@@ -103,7 +100,7 @@ my $re = qr{
     ^ (?&ts) : (?&non_ts) $
     (?(DEFINE)
      (?<ts> (?&date) : (?&date) )
-     (?<date> (\d{4}+\s++\d++\s++\d++\s++\d++\s++\d++\s++\d++) (?{push @dates, $^N}) )
+     (?<date> (\d{4}\s++\d++\s++\d++\s++\d++\s++\d++\s++\d++) (?{push @dates, $^N}) )
      (?<non_ts> (?&flex) : (?&tags) : (?&description))
      (?<flex> ([012]{2}) (?{$type = $^N}))
      (?<tags> (?:(?&tag)(\s++(?&tag))*+)?)
@@ -338,13 +335,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Vacation::Period - extension of L<App::JobLog::Log::Event> to handle special properties of vacation periods
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

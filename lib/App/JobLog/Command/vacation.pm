@@ -1,8 +1,5 @@
 package App::JobLog::Command::vacation;
-{
-  $App::JobLog::Command::vacation::VERSION = '1.031';
-}
-
+$App::JobLog::Command::vacation::VERSION = '1.032';
 # ABSTRACT: controller for vacation dates
 
 use Modern::Perl;
@@ -15,6 +12,7 @@ use autouse 'App::JobLog::Vacation::Period' => qw(
   MONTHLY
 );
 use Class::Autouse qw(App::JobLog::Vacation);
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -140,13 +138,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::vacation - controller for vacation dates
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

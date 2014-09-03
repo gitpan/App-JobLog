@@ -1,8 +1,5 @@
 package App::JobLog::Command::truncate;
-{
-  $App::JobLog::Command::truncate::VERSION = '1.031';
-}
-
+$App::JobLog::Command::truncate::VERSION = '1.032';
 # ABSTRACT: decapitate the log
 
 
@@ -15,6 +12,7 @@ use autouse 'App::JobLog::Config' => qw(log dir);
 use autouse 'File::Copy'          => qw(move);
 
 use Modern::Perl;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -173,13 +171,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::truncate - decapitate the log
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

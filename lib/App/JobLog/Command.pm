@@ -1,8 +1,5 @@
 package App::JobLog::Command;
-{
-  $App::JobLog::Command::VERSION = '1.031';
-}
-
+$App::JobLog::Command::VERSION = '1.032';
 # ABSTRACT: common functionality of App::JobLog commands
 
 use App::Cmd::Setup -command;
@@ -93,13 +90,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command - common functionality of App::JobLog commands
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

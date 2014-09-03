@@ -1,8 +1,5 @@
 package App::JobLog::Log::Synopsis;
-{
-  $App::JobLog::Log::Synopsis::VERSION = '1.031';
-}
-
+$App::JobLog::Log::Synopsis::VERSION = '1.032';
 # ABSTRACT: consolidates App::JobClock::Log::Event objects for display
 
 
@@ -35,6 +32,7 @@ use Modern::Perl;
 use autouse 'Carp'              => qw(carp);
 use autouse 'App::JobLog::Time' => qw(now);
 use Class::Autouse qw(DateTime);
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use constant MERGE_ALL                => 1;
 use constant MERGE_ADJACENT           => 2;
@@ -280,13 +278,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Log::Synopsis - consolidates App::JobClock::Log::Event objects for display
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

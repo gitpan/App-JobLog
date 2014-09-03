@@ -1,8 +1,5 @@
 package App::JobLog::Log;
-{
-  $App::JobLog::Log::VERSION = '1.031';
-}
-
+$App::JobLog::Log::VERSION = '1.032';
 # ABSTRACT: the code that lets us interact with the log
 
 
@@ -18,6 +15,7 @@ use Class::Autouse qw(
   DateTime
   FileHandle
 );
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 # some stuff useful for searching log
 use constant WINDOW   => 30;
@@ -807,13 +805,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Log - the code that lets us interact with the log
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

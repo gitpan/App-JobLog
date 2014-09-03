@@ -1,8 +1,5 @@
 package App::JobLog::Config;
-{
-  $App::JobLog::Config::VERSION = '1.031';
-}
-
+$App::JobLog::Config::VERSION = '1.032';
 # ABSTRACT: central depot for App::JobLog configuration parameters and controller allowing their modification
 
 
@@ -344,13 +341,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Config - central depot for App::JobLog configuration parameters and controller allowing their modification
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

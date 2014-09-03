@@ -1,5 +1,8 @@
 Revision history for App::JobLog
 
+1.032     2014-09-03 10:00:40-04:00 America/New_York
+  * various fixes to silence warnings in Perls >= 5.18
+
 1.031     2013-05-09 21:59:59 America/New_York
   * small improvement to info output
   * fixed binary search bug in log

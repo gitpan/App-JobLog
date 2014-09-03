@@ -10,13 +10,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 job - log what you do
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

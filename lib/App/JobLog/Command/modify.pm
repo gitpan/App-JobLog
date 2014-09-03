@@ -1,13 +1,11 @@
 package App::JobLog::Command::modify;
-{
-  $App::JobLog::Command::modify::VERSION = '1.031';
-}
-
+$App::JobLog::Command::modify::VERSION = '1.032';
 # ABSTRACT: modify last logged event
 
 use App::JobLog -command;
 use Modern::Perl;
 use Class::Autouse qw(App::JobLog::Log);
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -80,13 +78,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::modify - modify last logged event
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

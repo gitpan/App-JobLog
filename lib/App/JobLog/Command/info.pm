@@ -1,8 +1,5 @@
 package App::JobLog::Command::info;
-{
-  $App::JobLog::Command::info::VERSION = '1.031';
-}
-
+$App::JobLog::Command::info::VERSION = '1.032';
 # ABSTRACT: provides general App::JobLog information
 
 use App::JobLog -command;
@@ -15,6 +12,7 @@ use Class::Autouse qw(Config File::Spec);
 $App::JobLog::Command::info::VERSION ||= .001; # Dist::Zilla will automatically update this
 
 use Modern::Perl;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 # using quasi-pod -- == instead of = -- to make this work with Pod::Weaver
 
@@ -447,13 +445,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::info - provides general App::JobLog information
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

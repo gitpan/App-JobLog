@@ -1,8 +1,5 @@
 package App::JobLog::Command::summary;
-{
-  $App::JobLog::Command::summary::VERSION = '1.031';
-}
-
+$App::JobLog::Command::summary::VERSION = '1.032';
 # ABSTRACT: show what you did during a particular period
 
 use App::JobLog -command;
@@ -34,6 +31,7 @@ use autouse 'App::JobLog::Log::Synopsis' => qw(
   MERGE_NONE
 );
 use autouse 'App::JobLog::Time' => qw(today);
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -430,13 +428,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::summary - show what you did during a particular period
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

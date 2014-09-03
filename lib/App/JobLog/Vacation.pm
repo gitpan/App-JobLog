@@ -1,8 +1,5 @@
 package App::JobLog::Vacation;
-{
-  $App::JobLog::Vacation::VERSION = '1.031';
-}
-
+$App::JobLog::Vacation::VERSION = '1.032';
 # ABSTRACT: controller for the vacation model
 
 
@@ -163,13 +160,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Vacation - controller for the vacation model
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 

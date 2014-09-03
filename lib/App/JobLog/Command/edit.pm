@@ -1,8 +1,5 @@
 package App::JobLog::Command::edit;
-{
-  $App::JobLog::Command::edit::VERSION = '1.031';
-}
-
+$App::JobLog::Command::edit::VERSION = '1.032';
 # ABSTRACT: edit the log
 
 use App::JobLog -command;
@@ -154,13 +151,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::edit - edit the log
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

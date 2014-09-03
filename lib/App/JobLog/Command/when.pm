@@ -1,8 +1,5 @@
 package App::JobLog::Command::when;
-{
-  $App::JobLog::Command::when::VERSION = '1.031';
-}
-
+$App::JobLog::Command::when::VERSION = '1.032';
 # ABSTRACT: when you'll be done for the day
 
 use App::JobLog -command;
@@ -167,13 +164,15 @@ sub options {
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::when - when you'll be done for the day
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

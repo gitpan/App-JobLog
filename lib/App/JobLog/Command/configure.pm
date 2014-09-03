@@ -1,8 +1,5 @@
 package App::JobLog::Command::configure;
-{
-  $App::JobLog::Command::configure::VERSION = '1.031';
-}
-
+$App::JobLog::Command::configure::VERSION = '1.032';
 # ABSTRACT: examine or modify App::JobLog configuration
 
 use App::JobLog -command;
@@ -30,6 +27,7 @@ use App::JobLog::Config qw(
   WORKDAYS
 );
 use autouse 'App::JobLog::TimeGrammar' => qw(parse);
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 sub execute {
     my ( $self, $opt, $args ) = @_;
@@ -268,13 +266,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Command::configure - examine or modify App::JobLog configuration
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 SYNOPSIS
 

@@ -1,8 +1,5 @@
 package App::JobLog::Log::Day;
-{
-  $App::JobLog::Log::Day::VERSION = '1.031';
-}
-
+$App::JobLog::Log::Day::VERSION = '1.032';
 # ABSTRACT: collects events and vacation in a complete day
 
 
@@ -168,13 +165,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 App::JobLog::Log::Day - collects events and vacation in a complete day
 
 =head1 VERSION
 
-version 1.031
+version 1.032
 
 =head1 DESCRIPTION
 
